@@ -249,6 +249,31 @@ class EditorMixin:
         self.field(form, "p", "col", "Column (starts at 1)", "int", minimum=1, maximum=8)
         self.field(form, "p", "rowspan", "Row span", "int", minimum=1, maximum=8)
         self.field(form, "p", "colspan", "Column span", "int", minimum=1, maximum=8)
+        self.field(
+            form,
+            "p",
+            "offset_x",
+            "X offset / mm",
+            "float",
+            minimum=-20,
+            maximum=20,
+            step=0.25,
+            tip="Fine adjustment from the automatic grid position. Positive moves right; zero restores the grid position.",
+        )
+        self.field(
+            form,
+            "p",
+            "offset_y",
+            "Y offset / mm",
+            "float",
+            minimum=-20,
+            maximum=20,
+            step=0.25,
+            tip="Positive moves up. Labels, annotations and image insets move with the panel.",
+        )
+        reset_position = W.QPushButton("Reset panel position")
+        reset_position.clicked.connect(self.reset_panel_position)
+        form.addRow("", reset_position)
         form = self.group(box, "Axes, limits & ticks")
         for axis in ["x", "y"]:
             self.field(

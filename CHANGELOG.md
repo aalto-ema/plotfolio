@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added per-panel X/Y position offsets in millimetres and an undoable position reset.
+
 - Added direct numeric figure dimensions, editable panel gaps, and an undoable size/spacing reset.
 
 ## 0.3.0

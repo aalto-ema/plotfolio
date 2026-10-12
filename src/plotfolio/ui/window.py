@@ -701,6 +701,15 @@ class Studio(EditorMixin, ProjectActionsMixin, W.QMainWindow):
         self.fill_scope("s")
         self.schedule()
 
+    def reset_panel_position(self):
+        p = self.current_panel()
+        if p is None or not (p.get("offset_x", 0) or p.get("offset_y", 0)):
+            return
+        self.checkpoint()
+        p.update(offset_x=0.0, offset_y=0.0)
+        self.fill_scope("p")
+        self.schedule()
+
     def reset_geometry(self):
         self.checkpoint()
         g = self.doc["settings"]
@@ -718,7 +727,15 @@ class Studio(EditorMixin, ProjectActionsMixin, W.QMainWindow):
             hspace=0.08,
         )
         for i, p in enumerate(self.doc["panels"]):
-            p.update(row=i // cols, col=i % cols, rowspan=1, colspan=1, box_aspect="")
+            p.update(
+                row=i // cols,
+                col=i % cols,
+                rowspan=1,
+                colspan=1,
+                box_aspect="",
+                offset_x=0.0,
+                offset_y=0.0,
+            )
         self.refresh()
         self.schedule()
         self.statusBar().showMessage(

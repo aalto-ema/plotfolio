@@ -70,6 +70,8 @@ def panel(dataset="", x="", ys=(), row=0, col=0):
         xdecimals=-1,
         ydecimals=-1,
         rotation=0,
+        offset_x=0.0,
+        offset_y=0.0,
         row=row,
         col=col,
         rowspan=1,

@@ -150,3 +150,7 @@ Choose Manuscript preview from the toolbar to see the figure on A4 or Letter pap
 ## Direct dimensions and layout reset
 
 In Figure → Publication size, type numeric width and height in millimetres, then press Enter or leave the field. Horizontal and vertical gap controls set minimum spacing as percentages of the subplot grid; automatic layout can add room for axis labels and colorbars. Reset size & spacing restores the selected template width, a balanced height, equal grid tracks, automatic gaps and panel shapes, and removes panel spans. It retains your column count, data and styling. Undo restores the previous layout.
+
+## Fine panel positioning
+
+Select a panel, then use Panel → Grid position → X offset / mm and Y offset / mm. Zero follows the automatic grid; positive X moves right and positive Y moves up. Use 0.25 mm steps or type an exact value. The panel, labels, annotations, inset and colorbar move together; data values and axis limits stay unchanged. Offsets also apply to exported figures and manuscript previews. Reset panel position clears only the selected panel's offsets; Undo restores them. Reset size & spacing clears all panel offsets. Large shifts can overlap adjacent panels or clip labels, so inspect the preview.

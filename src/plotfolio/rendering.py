@@ -5,11 +5,44 @@ import math
 import matplotlib as mpl
 import numpy as np
 from matplotlib.figure import Figure
+from matplotlib.layout_engine import ConstrainedLayoutEngine
 from matplotlib.ticker import FormatStrFormatter, LogLocator, MaxNLocator
 
 from .annotations import add_annotation
 from .constants import COLORS
 from .data import columns, image_array, numeric, ratios
+
+
+class PanelOffsetLayoutEngine(ConstrainedLayoutEngine):
+    """Apply physical panel nudges after automatic layout on every draw/export."""
+
+    def __init__(self, offsets, width, height, **kwargs):
+        super().__init__(**kwargs)
+        self.offsets = offsets
+        self.width = width
+        self.height = height
+        self.base_positions = {}
+
+    def execute(self, fig):
+        for ax, position in self.base_positions.items():
+            in_layout = ax.get_in_layout()
+            ax.set_position(position)
+            ax.set_in_layout(in_layout)
+        super().execute(fig)
+        self.base_positions = {
+            ax: ax.get_position(original=True).frozen() for ax, _, _ in self.offsets
+        }
+        for ax, x, y in self.offsets:
+            if not x and not y:
+                continue
+            bounds = ax.get_position(original=True).translated(x / self.width, y / self.height)
+            if bounds.x0 < 0 or bounds.y0 < 0 or bounds.x1 > 1 or bounds.y1 > 1:
+                raise ValueError(
+                    "Panel offset moves its plotting area outside the figure. Reduce the offset or reset position."
+                )
+            in_layout = ax.get_in_layout()
+            ax.set_position(bounds)
+            ax.set_in_layout(in_layout)
 
 
 def color_for(s, index, total, cmap):
@@ -433,4 +466,14 @@ def build_figure(doc):
                     va="bottom",
                     fontweight="bold",
                 )
+        offsets = []
+        for ax, p in zip(axes, panels):
+            x, y = float(p.get("offset_x", 0)), float(p.get("offset_y", 0))
+            if not math.isfinite(x) or not math.isfinite(y):
+                raise ValueError("Panel offsets must be finite numbers.")
+            offsets.append((ax, x, y))
+        if any(x or y for _, x, y in offsets):
+            fig.set_layout_engine(
+                PanelOffsetLayoutEngine(offsets, width, height, **fig.get_layout_engine().get())
+            )
         return fig, axes, notes
