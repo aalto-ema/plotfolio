@@ -5,7 +5,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 import numpy as np
-from PySide6 import QtTest
+from PySide6 import QtCore, QtTest
 from PySide6 import QtWidgets as W
 
 from plotfolio.engine import build_figure, load_project, save_project
@@ -27,6 +27,21 @@ def main():
     if "--screenshot" in sys.argv:
         ui.grab().save(str(Path(__file__).resolve().parents[1] / "plotfolio_ui.png"))
     ui.data_dock.hide()
+    # Dimensions must accept intermediate digits below the allowed final minimum.
+    width = ui.fields[("g", "width")]
+    width.setFocus()
+    width.selectAll()
+    QtTest.QTest.keyClicks(width, "162.5")
+    QtTest.QTest.keyClick(width, QtCore.Qt.Key.Key_Return)
+    QtTest.QTest.qWait(350)
+    assert ui.doc["settings"]["width"] == 162.5
+    ui.fields[("g", "wspace")].setValue(25)
+    previous = copy.deepcopy(ui.doc)
+    ui.reset_geometry()
+    assert ui.doc["settings"]["wspace"] == 0.08
+    assert ui.doc["datasets"] == previous["datasets"]
+    ui.undo()
+    assert ui.doc == previous
     ui.panels.setCurrentRow(0)
     app.processEvents()
     n = len(ui.doc["panels"])

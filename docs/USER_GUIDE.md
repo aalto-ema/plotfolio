@@ -146,3 +146,7 @@ Technique references: [Pine Research CV](https://pineresearch.com/support-articl
 Use Figure → Panel labels to choose case, parentheses and axes-fraction positions. Panel → Panel label & shape gives per-panel overrides; leave these blank to follow global settings. Height/width ratio 1 makes a square plotting area.
 
 Choose Manuscript preview from the toolbar to see the figure on A4 or Letter paper. Two-column mode verifies single-column fit and never shrinks the figure. Open manuscript PDF to place the figure on a selected existing page using millimetre offsets from the left and top. Save preview PDF creates a copy. Screen zoom affects only viewing, and 100% depends on display DPI.
+
+## Direct dimensions and layout reset
+
+In Figure → Publication size, type numeric width and height in millimetres, then press Enter or leave the field. Horizontal and vertical gap controls set minimum spacing as percentages of the subplot grid; automatic layout can add room for axis labels and colorbars. Reset size & spacing restores the selected template width, a balanced height, equal grid tracks, automatic gaps and panel shapes, and removes panel spans. It retains your column count, data and styling. Undo restores the previous layout.

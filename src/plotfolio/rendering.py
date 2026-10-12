@@ -54,6 +54,9 @@ def build_figure(doc):
     }
     with mpl.rc_context(rc):
         fig = Figure(figsize=(width / 25.4, height / 25.4), dpi=110, layout="constrained")
+        fig.get_layout_engine().set(
+            wspace=float(g.get("wspace", 0.08)), hspace=float(g.get("hspace", 0.08))
+        )
         if not panels:
             fig.text(
                 0.5,

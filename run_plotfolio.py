@@ -1,4 +1,4 @@
-"""Launch the local PlotFolio source from VS Code or a terminal.
+"""Launch the local PlotFolio source.
 
 Select the project's .venv interpreter before running this file.
 An optional project filename can be passed as a command-line argument.
@@ -17,7 +17,7 @@ def main():
     except ModuleNotFoundError as error:
         print(
             f"Missing dependency: {error.name}.\n"
-            "Select the project's .venv Python interpreter in VS Code, or install "
+            "Use the project's .venv Python interpreter, or install "
             "dependencies with:\n"
             f'  "{sys.executable}" -m pip install -e "{root}"',
             file=sys.stderr,

@@ -93,13 +93,21 @@ class NumberBox(W.QDoubleSpinBox):
             state = (
                 G.QValidator.State.Acceptable
                 if math.isfinite(value) and self.minimum() <= value <= self.maximum()
-                else G.QValidator.State.Invalid
+                else (
+                    G.QValidator.State.Intermediate
+                    if math.isfinite(value)
+                    else G.QValidator.State.Invalid
+                )
             )
         except ValueError:
             state = (
                 G.QValidator.State.Intermediate
                 if text in ["", "-", "+", ".", "-."] or text.lower().endswith(("e", "e-", "e+"))
-                else G.QValidator.State.Invalid
+                else (
+                    G.QValidator.State.Intermediate
+                    if math.isfinite(value)
+                    else G.QValidator.State.Invalid
+                )
             )
         return state, text, pos
 

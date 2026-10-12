@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Added direct numeric figure dimensions, editable panel gaps, and an undoable size/spacing reset.
+
 ## 0.3.0
 
 - Renamed to PlotFolio and split the application into an installable src package.

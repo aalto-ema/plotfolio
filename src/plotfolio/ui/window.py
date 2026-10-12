@@ -274,6 +274,8 @@ class Studio(EditorMixin, ProjectActionsMixin, W.QMainWindow):
             return
         if scope == "p" and key in ["row", "col"]:
             value = int(value) - 1
+        if scope == "g" and key in ["wspace", "hspace"]:
+            value = float(value) / 100
         if target.get(key) == value:
             return
         self.checkpoint((scope, self.panel_index, self.series_index, self.mark_index, key))
@@ -339,6 +341,8 @@ class Studio(EditorMixin, ProjectActionsMixin, W.QMainWindow):
                 value = target[key]
                 if scope == "p" and key in ["row", "col"]:
                     value += 1
+                if scope == "g" and key in ["wspace", "hspace"]:
+                    value *= 100
                 self.set_value(widget, value)
         self.guard = previous
 
@@ -696,6 +700,30 @@ class Studio(EditorMixin, ProjectActionsMixin, W.QMainWindow):
                 s["color"] = ""
         self.fill_scope("s")
         self.schedule()
+
+    def reset_geometry(self):
+        self.checkpoint()
+        g = self.doc["settings"]
+        cols = max(1, int(g["cols"]))
+        rows = max(1, math.ceil(len(self.doc["panels"]) / cols))
+        single, double, _, _ = TEMPLATES[g["template"]]
+        width = single if g["columns"] == "Single" else double
+        g.update(
+            width=width,
+            height=max(30, min(500, width * rows / cols * 170 / 180)),
+            rows=rows,
+            width_ratios="",
+            height_ratios="",
+            wspace=0.08,
+            hspace=0.08,
+        )
+        for i, p in enumerate(self.doc["panels"]):
+            p.update(row=i // cols, col=i % cols, rowspan=1, colspan=1, box_aspect="")
+        self.refresh()
+        self.schedule()
+        self.statusBar().showMessage(
+            "Size and spacing reset. Use Undo to restore the previous layout."
+        )
 
     def reflow(self):
         self.checkpoint()

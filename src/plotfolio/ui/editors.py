@@ -56,12 +56,15 @@ class EditorMixin:
         elif kind == "bool":
             widget = W.QCheckBox()
             widget.toggled.connect(lambda value: self.change(scope, key, value))
-        elif kind in ["int", "float", "factor"]:
+        elif kind in ["int", "float", "factor", "dimension"]:
             widget = W.QSpinBox() if kind == "int" else NumberBox()
             widget.setRange(minimum, maximum)
-            if kind in ["float", "factor"]:
+            if kind in ["float", "factor", "dimension"]:
                 widget.setDecimals(16 if kind == "factor" else 6)
                 widget.setSingleStep(step)
+            if kind == "dimension":
+                widget.setStyleSheet("QDoubleSpinBox { padding-right: 22px; }")
+                widget.setDecimals(2)
             widget.setKeyboardTracking(False)
             widget.valueChanged.connect(lambda value: self.change(scope, key, value))
         elif kind == "color":
@@ -83,9 +86,12 @@ class EditorMixin:
         form = self.group(box, "Publication size")
         self.field(form, "g", "template", "Publisher template", "combo", list(TEMPLATES))
         self.field(form, "g", "columns", "Column format", "combo", ["Single", "Double"])
-        self.field(form, "g", "width", "Width / mm", "float", minimum=30, maximum=500, step=1)
-        self.field(form, "g", "height", "Height / mm", "float", minimum=30, maximum=500, step=1)
+        self.field(form, "g", "width", "Width / mm", "dimension", minimum=30, maximum=500, step=1)
+        self.field(form, "g", "height", "Height / mm", "dimension", minimum=30, maximum=500, step=1)
         self.field(form, "g", "dpi", "Raster export DPI", "int", minimum=72, maximum=2400)
+        self.hint(
+            box, "Type width and height in millimetres; press Enter or leave the field to apply."
+        )
         self.template_note = self.hint(
             box, "Templates are starting points; verify the target journal’s instructions."
         )
@@ -109,6 +115,20 @@ class EditorMixin:
             "Row ratios",
             tip="One positive number per row; e.g. 2:1. Blank = equal.",
         )
+        self.field(
+            form, "g", "wspace", "Horizontal gap / %", "float", minimum=0, maximum=100, step=1
+        )
+        self.field(form, "g", "hspace", "Vertical gap / %", "float", minimum=0, maximum=100, step=1)
+        self.hint(
+            box,
+            "Gaps are a percentage of the subplot grid dimension. Automatic layout also reserves space for labels and colorbars.",
+        )
+        reset = W.QPushButton("Reset size & spacing")
+        reset.setToolTip(
+            "Restore template width, balanced height, equal panel sizes and automatic spacing. Undo restores your previous layout."
+        )
+        reset.clicked.connect(self.reset_geometry)
+        form.addRow("", reset)
         button = W.QPushButton("Arrange panels in this grid")
         button.clicked.connect(self.reflow)
         form.addRow("", button)

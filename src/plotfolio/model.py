@@ -12,6 +12,8 @@ def settings():
         cols=2,
         width_ratios="",
         height_ratios="",
+        wspace=0.08,
+        hspace=0.08,
         sharex=False,
         sharey=False,
         grid=True,

@@ -43,6 +43,10 @@ when changes or unresolved failures justify it.
 
 ## Scope and releases
 
-Do not publish, push, or upload repository contents unless the user requests it.
+The user has authorized pushing completed, validated changes to the existing
+`aalto-ema/plotfolio` GitHub repository by default. Commit and push project changes
+after relevant checks pass, and report any push failure. Never commit user data,
+credentials, virtual environments, or generated exports. This authorization does
+not extend to publishing packages or creating repositories elsewhere.
 Use `CHANGELOG.md` for user-visible changes. Read `CONTRIBUTING.md` for the public
 contribution workflow. Keep guidance in this file specific to this project.

@@ -17,12 +17,11 @@ plotfolio
 
 You can also run `python -m plotfolio` or `plotfolio project.plotfolio.json`.
 
-### Run from VS Code
+### Run the local source
 
-Open this folder in VS Code, use **Python: Select Interpreter** to select the
-project's `.venv`, then open `run_plotfolio.py` and choose **Run Python File**.
-The launcher runs the source in this folder, including your latest edits.
-You can also use `python run_plotfolio.py` from a terminal, with an optional
+With the project's virtual environment activated, run `python run_plotfolio.py`.
+The launcher uses the source in this folder, including your latest edits.
+You can supply an optional
 project filename: `python run_plotfolio.py examples/example.plotfolio.json`.
 
 ## Features
