@@ -559,6 +559,9 @@ class Studio(EditorMixin, ProjectActionsMixin, W.QMainWindow):
             canvas = FigureCanvasQTAgg(fig)
             canvas.draw()
             toolbar = StudioToolbar(canvas, self.plot_container, self.export, self.apply_view)
+            canvas.mpl_connect("button_press_event", self.legend_press)
+            canvas.mpl_connect("motion_notify_event", self.legend_motion)
+            canvas.mpl_connect("button_release_event", self.legend_release)
             canvas.mpl_connect("button_press_event", self.plot_clicked)
             # Replace only after the new figure has rendered successfully.
             if self.canvas:
@@ -568,6 +571,7 @@ class Studio(EditorMixin, ProjectActionsMixin, W.QMainWindow):
                 self.toolbar.deleteLater()
             self.canvas, self.toolbar, self.plot_axes = canvas, toolbar, axes
             self.rendered_panels = copy.deepcopy(self.doc["panels"])
+            self.rendered_settings = copy.deepcopy(self.doc["settings"])
             self.plot_frame = PreviewFrame(
                 canvas, float(self.doc["settings"]["width"]) / float(self.doc["settings"]["height"])
             )
@@ -588,7 +592,85 @@ class Studio(EditorMixin, ProjectActionsMixin, W.QMainWindow):
             self.live.setText("PREVIEW NEEDS UPDATE")
             return False
 
+    def reset_legend_position(self, scope):
+        target = self.target(scope)
+        if target is None:
+            return
+        self.checkpoint()
+        target.update(
+            legend_placement="Outside below" if scope == "g" else "Inside", legend_x="", legend_y=""
+        )
+        if scope == "p":
+            target["legend_loc"] = "best"
+        self.fill_scope(scope)
+        self.schedule()
+
+    def legend_press(self, event):
+        self.legend_drag = None
+        if event.button != 1 or self.place_mode or self.toolbar.mode or self.timer.isActive():
+            return
+        if (
+            getattr(self, "rendered_panels", []) != self.doc["panels"]
+            or getattr(self, "rendered_settings", {}) != self.doc["settings"]
+        ):
+            return
+        candidates = [
+            (legend, "g", None, self.canvas.figure.transFigure)
+            for legend in self.canvas.figure.legends
+        ]
+        candidates += [
+            (ax.get_legend(), "p", i, ax.transAxes)
+            for i, ax in enumerate(self.plot_axes)
+            if ax.get_legend()
+        ]
+        for legend, scope, index, transform in candidates:
+            if legend.contains(event)[0]:
+                bounds = legend.get_window_extent(self.canvas.get_renderer())
+                self.legend_drag = dict(
+                    legend=legend,
+                    scope=scope,
+                    index=index,
+                    transform=transform,
+                    start=(event.x, event.y),
+                    origin=(bounds.x0, bounds.y0),
+                    moved=False,
+                )
+                return
+
+    def legend_motion(self, event):
+        drag = getattr(self, "legend_drag", None)
+        if not drag or event.x is None or event.y is None:
+            return
+        dx, dy = event.x - drag["start"][0], event.y - drag["start"][1]
+        if abs(dx) + abs(dy) < 3 and not drag["moved"]:
+            return
+        x, y = (
+            drag["transform"].inverted().transform((drag["origin"][0] + dx, drag["origin"][1] + dy))
+        )
+        drag.update(position=(float(x), float(y)), moved=True)
+        drag["legend"].set_loc("lower left")
+        drag["legend"].borderaxespad = 0
+        drag["legend"].set_bbox_to_anchor((x, y), transform=drag["transform"])
+        self.canvas.draw_idle()
+
+    def legend_release(self, event):
+        drag = getattr(self, "legend_drag", None)
+        self.legend_drag = None
+        if not drag or not drag["moved"]:
+            return
+        self.checkpoint()
+        target = self.doc["settings"] if drag["scope"] == "g" else self.doc["panels"][drag["index"]]
+        target.update(
+            legend_placement="Custom", legend_x=drag["position"][0], legend_y=drag["position"][1]
+        )
+        if drag["scope"] == "p":
+            self.panels.setCurrentRow(drag["index"])
+        self.fill_scope(drag["scope"])
+        self.schedule()
+
     def plot_clicked(self, event):
+        if getattr(self, "legend_drag", None):
+            return
         if event.button != 1 or event.inaxes is None or self.toolbar.mode:
             return
         if event.inaxes not in self.plot_axes:

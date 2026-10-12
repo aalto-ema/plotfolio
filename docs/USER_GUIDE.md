@@ -154,3 +154,11 @@ In Figure → Publication size, type numeric width and height in millimetres, th
 ## Fine panel positioning
 
 Select a panel, then use Panel → Grid position → X offset / mm and Y offset / mm. Zero follows the automatic grid; positive X moves right and positive Y moves up. Use 0.25 mm steps or type an exact value. The panel, labels, annotations, inset and colorbar move together; data values and axis limits stay unchanged. Offsets also apply to exported figures and manuscript previews. Reset panel position clears only the selected panel's offsets; Undo restores them. Reset size & spacing clears all panel offsets. Large shifts can overlap adjacent panels or clip labels, so inspect the preview.
+
+## Legends without covering data
+
+Panel → Legend provides visibility, placement, independent font size (0 follows the figure font), and column count. Inside uses the automatic best location by default; Outside right and Outside below reserve space through automatic layout. Hidden removes the selected legend. More legend options contains inside alignment, title, row/column spacing, line sample length, frame padding, marker scale, frame visibility/opacity and custom X/Y anchors.
+
+Drag a legend in the preview to fine-tune it. Custom anchors use axes fractions for panel legends and figure fractions for shared legends, measured from the lower-left corner. The coordinates are saved and reused on export. Dragging is unavailable during pan/zoom or annotation placement. Reset legend position restores automatic placement without changing typography. Undo restores prior legend settings. A custom position is manual; check that it does not overlap data or extend beyond the figure.
+
+Figure → Shared legend → Legend mode switches between Per panel and Shared figure. A shared legend uses figure-level font, columns and advanced options. It collects entries from panels whose legends are enabled; hidden panels are excluded. Matching labels and styles merge into one entry; matching labels with different styles remain separate and include the panel name. Shared legends support outside right/below, custom dragging, reset and hiding. Narrow figures can still require shorter labels, smaller legend text, extra columns or a larger figure.

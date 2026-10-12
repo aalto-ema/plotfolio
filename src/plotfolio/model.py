@@ -1,8 +1,12 @@
 """Project schema defaults. Data remain JSON-serializable and independent of Qt."""
 
+from .legends import legend_defaults
+
 
 def settings():
     return dict(
+        **legend_defaults(shared=True),
+        legend_mode="Per panel",
         width=180,
         height=120,
         font=10,
@@ -50,6 +54,7 @@ def series(column, index=0):
 
 def panel(dataset="", x="", ys=(), row=0, col=0):
     return dict(
+        **legend_defaults(),
         name="Panel",
         dataset=dataset,
         x=x,

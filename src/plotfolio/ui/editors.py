@@ -81,6 +81,98 @@ class EditorMixin:
         self.field_rows[(scope, key)] = (form, widget)
         return widget
 
+    def legend_controls(self, box, scope):
+        form = self.group(box, "Shared legend" if scope == "g" else "Legend")
+        if scope == "g":
+            self.field(
+                form, scope, "legend_mode", "Legend mode", "combo", ["Per panel", "Shared figure"]
+            )
+        else:
+            self.field(form, scope, "legend", "Visibility", "combo", ["Auto", "Show", "Hide"])
+        placements = (
+            ["Outside below", "Outside right", "Custom", "Hidden"]
+            if scope == "g"
+            else ["Inside", "Outside right", "Outside below", "Custom", "Hidden"]
+        )
+        self.field(form, scope, "legend_placement", "Placement", "combo", placements)
+        self.field(
+            form,
+            scope,
+            "legend_font",
+            "Font / pt (0 = auto)",
+            "float",
+            minimum=0,
+            maximum=30,
+            step=0.5,
+        )
+        self.field(form, scope, "legend_columns", "Columns", "int", minimum=1, maximum=12)
+        reset = W.QPushButton("Reset legend position")
+        reset.clicked.connect(lambda: self.reset_legend_position(scope))
+        form.addRow("", reset)
+        self.hint(
+            box,
+            "Drag the legend in the preview to fine-tune its position. Outside presets reserve room automatically.",
+        )
+        more = W.QPushButton("More legend options")
+        more.setCheckable(True)
+        box.addWidget(more)
+        body = W.QWidget()
+        advanced = W.QFormLayout(body)
+        advanced.setFieldGrowthPolicy(W.QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
+        self.field(
+            advanced,
+            scope,
+            "legend_loc",
+            "Inside position",
+            "combo",
+            [
+                "best",
+                "upper right",
+                "upper left",
+                "lower right",
+                "lower left",
+                "center",
+                "center left",
+                "center right",
+                "upper center",
+                "lower center",
+            ],
+        ) if scope == "p" else None
+        self.field(advanced, scope, "legend_title", "Legend title")
+        for key, label, minimum, maximum in [
+            ("labelspacing", "Row spacing", 0, 3),
+            ("columnspacing", "Column spacing", 0, 5),
+            ("handlelength", "Line sample length", 0.2, 5),
+            ("borderpad", "Frame padding", 0, 3),
+            ("markerscale", "Marker scale", 0.2, 3),
+        ]:
+            self.field(
+                advanced,
+                scope,
+                "legend_" + key,
+                label,
+                "float",
+                minimum=minimum,
+                maximum=maximum,
+                step=0.1,
+            )
+        self.field(advanced, scope, "legend_frame", "Show frame", "bool")
+        self.field(
+            advanced,
+            scope,
+            "legend_opacity",
+            "Frame opacity",
+            "float",
+            minimum=0,
+            maximum=1,
+            step=0.1,
+        )
+        self.field(advanced, scope, "legend_x", "Custom X")
+        self.field(advanced, scope, "legend_y", "Custom Y")
+        box.addWidget(body)
+        body.hide()
+        more.toggled.connect(body.setVisible)
+
     def build_figure_tab(self):
         box = self.page("Figure")
         form = self.group(box, "Publication size")
@@ -169,6 +261,7 @@ class EditorMixin:
             box,
             "Auto-colored series follow the palette. Explicit series colors override it. The same colormap controls heatmaps.",
         )
+        self.legend_controls(box, "g")
         box.addStretch()
 
     def build_panel_tab(self):
@@ -200,26 +293,6 @@ class EditorMixin:
         self.field(
             form, "p", "palette_offset", "Palette starting offset", "int", minimum=0, maximum=10
         )
-        self.field(form, "p", "legend", "Legend visibility", "combo", ["Auto", "Show", "Hide"])
-        self.field(
-            form,
-            "p",
-            "legend_loc",
-            "Legend position",
-            "combo",
-            [
-                "best",
-                "upper right",
-                "upper left",
-                "lower left",
-                "lower right",
-                "center",
-                "center left",
-                "center right",
-                "upper center",
-                "lower center",
-            ],
-        )
         self.field(form, "p", "title", "Title")
         self.field(form, "p", "xlabel", "X label")
         self.field(form, "p", "ylabel", "Y label")
@@ -227,6 +300,7 @@ class EditorMixin:
             box,
             r"Math labels: $H_{2}O$, $10^{-3}$, $\alpha$. Put math between dollar signs. Applies to titles, axes, legends and text annotations.",
         )
+        self.legend_controls(box, "p")
         form = self.group(box, "Panel label & shape")
         self.field(
             form,

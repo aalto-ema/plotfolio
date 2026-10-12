@@ -11,6 +11,7 @@ from matplotlib.ticker import FormatStrFormatter, LogLocator, MaxNLocator
 from .annotations import add_annotation
 from .constants import COLORS
 from .data import columns, image_array, numeric, ratios
+from .legends import draw_legend, shared_entries
 
 
 class PanelOffsetLayoutEngine(ConstrainedLayoutEngine):
@@ -106,6 +107,7 @@ def build_figure(doc):
             width_ratios=ratios(g["width_ratios"], nc),
             height_ratios=ratios(g["height_ratios"], nr),
         )
+        legend_entries = []
         occupied = set()
         axes = []
         shared = None
@@ -420,14 +422,11 @@ def build_figure(doc):
                 show_legend = g["legend"] if legend == "Auto" else legend == "Show"
                 if legend == "Auto" and p.get("category_colors") and len(ss) == 1:
                     show_legend = False
-                if show_legend and handles:
-                    ax.legend(
-                        frameon=True,
-                        fancybox=False,
-                        framealpha=1,
-                        edgecolor="black",
-                        loc=p.get("legend_loc", "best"),
-                    )
+                if show_legend and handles and p.get("legend_placement") != "Hidden":
+                    if g.get("legend_mode", "Per panel") == "Shared figure":
+                        legend_entries.append((handles, labels, p["name"]))
+                    else:
+                        draw_legend(ax, handles, labels, p, font)
             if p.get("box_aspect", "") != "":
                 ax.set_box_aspect(float(p["box_aspect"]))
             if p.get("aspect", "auto") == "equal":
@@ -466,6 +465,12 @@ def build_figure(doc):
                     va="bottom",
                     fontweight="bold",
                 )
+        if g.get("legend_mode") == "Shared figure":
+            handles, labels = shared_entries(legend_entries)
+            shared_settings = dict(g)
+            if shared_settings.get("legend_placement") == "Inside":
+                shared_settings["legend_placement"] = "Outside below"
+            draw_legend(fig, handles, labels, shared_settings, font, shared=True)
         offsets = []
         for ax, p in zip(axes, panels):
             x, y = float(p.get("offset_x", 0)), float(p.get("offset_y", 0))

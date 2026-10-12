@@ -34,6 +34,7 @@ ruff format --check .
 python -m unittest discover -s tests -p 'test_*.py'
 QT_QPA_PLATFORM=offscreen python tests/ui_smoke.py
 QT_QPA_PLATFORM=offscreen python tests/ui_interactions.py
+QT_QPA_PLATFORM=offscreen python tests/ui_legends.py
 ```
 
 Use platform-appropriate environment-variable syntax on Windows. For UI/layout

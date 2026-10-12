@@ -31,6 +31,7 @@ project filename: `python run_plotfolio.py examples/example.plotfolio.json`.
 - Line, scatter, categorical, histogram, heatmap and image panels; image insets.
 - Physical figure dimensions, grid ratios and spans, shared axes, explicit limits and ticks.
 - Per-series colors, markers, legend labels, line styles, scaling and uncertainty columns.
+- Inside/outside or shared legends, independent typography, columns and draggable exportable positions.
 - Math labels, text, lines, arrows and translucent shapes.
 - Uppercase/lowercase panel labels, optional parentheses and global or per-panel positions.
 - Arial defaults and balanced, title-free synthetic CV, Nyquist, bar and heatmap examples.
