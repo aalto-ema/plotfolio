@@ -204,3 +204,9 @@ Choose Bar with individual points, Line with an uncertainty band, or Scatter wit
 **Panel tools → Zoom inset, linked axes and uncertainty** keeps these advanced settings outside the inspector. The Data zoom tab magnifies Line/Scatter data using explicit plotted-unit limits, panel-relative bounds and optional connectors. Open it after panning/zooming to initialize the region from the current view; parent export limits remain unchanged. Curves and confidence-band polygons appear in the inset. Image insets remain available separately.
 
 Linked axes use an explicit affine conversion: `secondary = primary × factor + offset`, with an invertible, nonzero factor. They follow the primary scale and limits; they do not plot a different dataset. Example: V to mV uses 1000 and 0, Celsius to kelvin uses 1 and 273.15. The uncertainty tab specifies X-error columns, asymmetric Y deviations and absolute band boundary columns for the selected series.
+
+## Fitted-curve appearance
+
+In Analyze → Fit selected series, expand **Curve appearance** to choose color, solid/dashed/dotted/dash-dot lines, width, markers and marker size, curve opacity/visibility, and confidence-band color/opacity. The preview updates without recomputing fit parameters. Markers are spaced automatically along the fitted curve. The legend label is editable in the model section.
+
+For a curve already added, choose it in the existing-fit list and click **Edit selected fit appearance**. Review the live preview and Apply to save styling without changing parameters, covariance, residuals or confidence bounds. Undo restores its previous appearance. Styling is saved with the project and used by legends, zoom insets and exports.

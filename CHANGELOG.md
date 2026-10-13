@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Added fitted-curve styling for new and existing fits, with live previews, band colors/opacity and undoable edits that preserve numerical results.
+
 ## 0.4.0 — 2026-10-13
 
 - Added multi-file CSV/TSV/Excel import with delimiter/header previews and column roles/units.

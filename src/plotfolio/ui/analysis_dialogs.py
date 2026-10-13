@@ -10,8 +10,10 @@ from PySide6 import QtWidgets as W
 
 from ..analysis import summarize, transform
 from ..data import columns, numeric, numeric_columns
+from ..fit_styles import draw_fit
 from ..fitting import MODELS, fit_curve
 from ..model import series
+from .fit_style import FitStyleDialog, FitStyleEditor
 from .workflow_widgets import advanced, combo, form, hint, line, number, table, unique_key
 
 
@@ -53,9 +55,10 @@ class FitDialog(W.QDialog):
         f.addRow("Parameter names", self.parameters)
         self.fit_label = line(self.selected["label"] + " fit")
         f.addRow("Legend label", self.fit_label)
-        self.show_band = W.QCheckBox("Show mean-response confidence band")
-        self.show_band.setChecked(True)
-        f.addRow(self.show_band)
+        appearance = advanced(controls, "Curve appearance")
+        self.style_editor = FitStyleEditor(dict(color=self.selected.get("color") or "#333333"))
+        appearance.addRow(self.style_editor)
+        self.show_band = self.style_editor.show_band
         more = advanced(controls, "Fit range, weights and bounds")
         self.xmin = line()
         self.xmax = line()
@@ -90,6 +93,9 @@ class FitDialog(W.QDialog):
             ]
         )
         controls.addWidget(self.remove)
+        edit_style = W.QPushButton("Edit selected fit appearance…")
+        edit_style.clicked.connect(self.edit_existing_style)
+        controls.addWidget(edit_style)
         remove = W.QPushButton("Remove selected existing fit")
         remove.clicked.connect(self.remove_fit)
         controls.addWidget(remove)
@@ -131,6 +137,8 @@ class FitDialog(W.QDialog):
         ]:
             widget.textChanged.connect(self.invalidate)
         self.absolute.toggled.connect(self.invalidate)
+        self.style_editor.changed.connect(self.preview_style)
+        self.fit_label.textChanged.connect(self.preview_style)
 
     def context(self, *_):
         kind = self.model.currentText()
@@ -210,15 +218,15 @@ class FitDialog(W.QDialog):
             figure = Figure(figsize=(5, 4), layout="constrained")
             ax = figure.add_subplot()
             ax.scatter(r["data_x"], r["data_y"], s=12, color="#009EFA", label="Observations")
-            ax.plot(r["x"], r["y"], color="#E66B43", label="Fit")
-            if r["lower"] is not None:
-                ax.fill_between(r["x"], r["lower"], r["upper"], alpha=0.2, color="#E66B43")
+            styled = dict(r, **self.style_editor.values(), label=self.fit_label.text())
+            draw_fit(ax, styled)
             ax.set_xlabel(self.panel["xlabel"] or self.panel["x"])
             ax.set_ylabel(self.panel["ylabel"] or s["label"])
             ax.legend()
             canvas = FigureCanvasQTAgg(figure)
             canvas.draw()
             self.tabs.addTab(canvas, "Curve and band")
+            self.preview_canvas = canvas
             residual = Figure(figsize=(5, 4), layout="constrained")
             ra = residual.add_subplot()
             ra.scatter(r["data_x"], r["residuals"], s=12)
@@ -239,16 +247,53 @@ class FitDialog(W.QDialog):
     def apply(self):
         if self.result is None:
             return
+        try:
+            style = self.style_editor.values()
+        except ValueError as error:
+            self.status.setText(str(error))
+            return
         self.studio.checkpoint()
         result = copy.deepcopy(self.result)
         result.update(
             label=self.fit_label.text().strip() or self.selected["label"] + " fit",
-            color=self.selected.get("color") or "#333333",
-            show_band=self.show_band.isChecked(),
+            **style,
         )
         self.panel.setdefault("fits", []).append(result)
         self.studio.schedule()
         self.accept()
+
+    def edit_existing_style(self):
+        index = self.remove.currentIndex()
+        if index < 0:
+            self.status.setText("Choose an existing fitted curve first.")
+            return
+        FitStyleDialog(self.studio, self.panel["fits"][index]).exec()
+        for i, fit in enumerate(self.panel["fits"]):
+            self.remove.setItemText(i, f"{i + 1}: {fit.get('label', fit['model'])}")
+
+    def preview_style(self, *_):
+        if self.result is None or not hasattr(self, "preview_canvas"):
+            return
+        try:
+            figure = self.preview_canvas.figure
+            figure.clear()
+            ax = figure.add_subplot()
+            ax.scatter(
+                self.result["data_x"],
+                self.result["data_y"],
+                s=12,
+                color="#009EFA",
+                label="Observations",
+            )
+            draw_fit(
+                ax, dict(self.result, **self.style_editor.values(), label=self.fit_label.text())
+            )
+            ax.set_xlabel(self.panel["xlabel"] or self.panel["x"])
+            ax.set_ylabel(self.panel["ylabel"] or self.selected["label"])
+            ax.legend()
+            self.preview_canvas.draw()
+        except Exception as error:
+            self.status.setText(str(error))
 
     def remove_fit(self):
         index = self.remove.currentIndex()

@@ -13,6 +13,7 @@ from PySide6.QtWidgets import QApplication
 from plotfolio.model import document, panel
 from plotfolio.templates import make_template
 from plotfolio.ui.analysis_dialogs import DatasetAnalysisDialog, FitDialog
+from plotfolio.ui.fit_style import FitStyleDialog
 from plotfolio.ui.import_data import ImportDialog
 from plotfolio.ui.panel_tools import PanelToolsDialog
 from plotfolio.ui.template_dialogs import BatchDialog, TemplateMappingDialog
@@ -48,8 +49,29 @@ def main():
         fit = FitDialog(studio)
         fit.compute()
         assert fit.result is not None, fit.status.text()
+        fit.style_editor.width.setValue(2.5)
+        fit.style_editor.linestyle.setCurrentText("dotted")
         fit.apply()
         QTest.qWait(400)
+        current = studio.current_panel()["fits"][0]
+        assert current["linewidth"] == 2.5 and current["linestyle"] == "dotted"
+        numerical = copy.deepcopy(
+            {
+                key: current[key]
+                for key in ["parameters", "covariance", "x", "y", "lower", "upper", "residuals"]
+            }
+        )
+        editor = FitStyleDialog(studio, current)
+        editor.editor.color.set_value("#39A34A")
+        editor.editor.width.setValue(1.8)
+        editor.label.setText("Restyled fit")
+        editor.apply()
+        assert current["color"] == "#39A34A" and current["linewidth"] == 1.8
+        assert {key: current[key] for key in numerical} == numerical
+        studio.undo()
+        current = studio.current_panel()["fits"][0]
+        assert current["linewidth"] == 2.5
+
         assert studio.current_panel()["fits"]
         tools = PanelToolsDialog(studio)
         tools.zoom_enabled.setChecked(True)

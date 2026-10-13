@@ -81,7 +81,15 @@ def handle_style(handle):
     elif hasattr(handle, "patches") and handle.patches:
         handle = handle.patches[0]
     style = []
-    for method in ("get_color", "get_facecolor", "get_marker", "get_linestyle"):
+    for method in (
+        "get_color",
+        "get_facecolor",
+        "get_marker",
+        "get_linestyle",
+        "get_linewidth",
+        "get_markersize",
+        "get_alpha",
+    ):
         if hasattr(handle, method):
             value = getattr(handle, method)()
             if method in ("get_color", "get_facecolor"):

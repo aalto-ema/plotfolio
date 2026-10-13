@@ -5,21 +5,12 @@ import math
 import numpy as np
 from matplotlib.collections import PolyCollection
 
+from .fit_styles import draw_fit
+
 
 def overlays(ax, panel, doc=None):
     for fit in panel.get("fits", []):
-        x, y = np.asarray(fit["x"]), np.asarray(fit["y"])
-        color = fit.get("color", "#333333")
-        ax.plot(
-            x,
-            y,
-            color=color,
-            linestyle="--",
-            linewidth=1.3,
-            label=fit.get("label", fit["model"] + " fit"),
-        )
-        if fit.get("show_band", True) and fit.get("lower") is not None:
-            ax.fill_between(x, fit["lower"], fit["upper"], color=color, alpha=0.18, linewidth=0)
+        draw_fit(ax, fit)
     raw = panel.get("replicates")
     if raw and doc and panel["kind"] == "Bar":
         from .data import columns, numeric
@@ -69,6 +60,8 @@ def overlays(ax, panel, doc=None):
                 markeredgecolor=line.get_markeredgecolor(),
                 markeredgewidth=line.get_markeredgewidth(),
                 markerfacecolor=line.get_markerfacecolor(),
+                alpha=line.get_alpha(),
+                markevery=line.get_markevery(),
             )
         if (
             ax.get_xscale() == "log"
