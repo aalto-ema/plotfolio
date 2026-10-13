@@ -1,0 +1,4 @@
+include AGENTS.md CHANGELOG.md CONTRIBUTING.md LICENSE README.md run_plotfolio.py
+recursive-include docs *.md
+recursive-include examples *.csv *.json
+recursive-include tests *.py

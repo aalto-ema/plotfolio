@@ -6,7 +6,7 @@ from pathlib import Path
 from .constants import COLORS
 from .data import read_csv
 from .legends import legend_defaults
-from .model import document, panel, settings
+from .model import document, panel, series, settings
 from .rendering import build_figure
 
 
@@ -53,6 +53,7 @@ def load_project(path):
     doc["settings"] = {**defaults, **doc["settings"]}
     for index, p in enumerate(doc["panels"]):
         doc["panels"][index] = {**panel(), **p}
+        doc["panels"][index]["series"] = [{**series(s["y"]), **s} for s in p["series"]]
     for p in doc["panels"]:
         p.update({key: value for key, value in legend_defaults().items() if key not in p})
     build_figure(doc)

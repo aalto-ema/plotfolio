@@ -1,6 +1,15 @@
 # Changelog
 
-## Unreleased
+## 0.4.0 — 2026-10-13
+
+- Added multi-file CSV/TSV/Excel import with delimiter/header previews and column roles/units.
+- Added source-free reusable figure templates, column mapping and background batch exports with file/folder inputs and overwrite preflight.
+- Added linear, polynomial, exponential and safe custom fitting, parameter bounds, weighted least squares, residuals, covariance diagnostics and approximate confidence bands.
+- Added immutable derived tables with recorded operations, provenance review and recomputation.
+- Added explicit replicate summaries, raw-point overlays, asymmetric errors and uncertainty bands.
+- Added data-driven zoom insets with connectors and linked unit axes, accessed through modal panel tools.
+- Organized advanced workflows in Analyze, Templates and Panel tools menus.
+
 
 - Added inside/outside/shared legends, independent font sizing, columns and advanced spacing/frame controls, plus draggable positions and reset.
 

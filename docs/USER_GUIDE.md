@@ -162,3 +162,45 @@ Panel → Legend provides visibility, placement, independent font size (0 follow
 Drag a legend in the preview to fine-tune it. Custom anchors use axes fractions for panel legends and figure fractions for shared legends, measured from the lower-left corner. The coordinates are saved and reused on export. Dragging is unavailable during pan/zoom or annotation placement. Reset legend position restores automatic placement without changing typography. Undo restores prior legend settings. A custom position is manual; check that it does not overlap data or extend beyond the figure.
 
 Figure → Shared legend → Legend mode switches between Per panel and Shared figure. A shared legend uses figure-level font, columns and advanced options. It collects entries from panels whose legends are enabled; hidden panels are excluded. Matching labels and styles merge into one entry; matching labels with different styles remain separate and include the panel name. Shared legends support outside right/below, custom dragging, reset and hiding. Narrow figures can still require shorter labels, smaller legend text, extra columns or a larger figure.
+
+## Import data with roles and units
+
+Choose **Import data** and select one or more CSV, TSV, TXT or Excel `.xlsx` files. Preview parsing, select a delimiter and header/start row, and use **Roles and units** to assign X, Y, uncertainty or grouping columns and units. The parsing settings and header-based metadata apply to all selected files. Select each file to inspect it before importing; for mixed structures, import them in separate passes. Excel can import a selected sheet or all sheets; formula cells use saved values, so recalculate and save the workbook first. Legacy `.xls` files should be saved as `.xlsx` or CSV.
+
+New panels use explicit X/Y assignments and unit labels when available. A single Y-error column is automatically assigned only when there is one Y series. Advanced panel tools provide per-series X errors, asymmetric Y errors and bands. Imported tables remain unchanged.
+
+## Reusable templates and batch plotting
+
+Use **Templates → Save figure template** to save layout, typography, legends, series styles, column requirements and export dimensions/DPI. Templates omit source data rows, fitted results and individual replicate overlays; they are designs, not frozen measurements. Images and manually entered annotation text remain in the design.
+
+Use **Apply figure template** to map each template source to an imported dataset and map its required columns explicitly. Data are used in their stored units; review axis labels and scale factors after mapping. Applying a template is undoable.
+
+**Batch plotting** uses a template with one dataset source. Select compatible imported datasets or add files/import a folder within the dialog, choose column mappings, output format and an existing output folder. All required columns, figure layouts and output names are checked before writing exports. Existing files are never overwritten. Multi-source figures use Apply template with explicit mappings rather than guessing pairings across files. Batch inputs added in the dialog do not replace your working project's datasets.
+
+## Fitting selected series
+
+Select a Line or Scatter series, then **Analyze → Fit selected series**. Choose Linear, Polynomial (degree 1–8), Exponential decay (`a*exp(-x/tau)+c`) or Custom. Preview the curve, residuals and diagnostic report before adding a fitted overlay. Custom formulas use arithmetic and supported math functions with explicitly named parameters; they never execute Python.
+
+**Fit range, weights and bounds** contains X limits, optional Y uncertainty, absolute-SD interpretation, confidence level, initial values and parameter bounds. Fits use the selected series' plotted X/Y units. Only select absolute measurement SD when that interpretation is warranted. Invalid/zero uncertainties in the fit range are rejected. Data outside the selected range and nonfinite observations are counted in the report.
+
+Reports include parameter standard errors, residual degrees of freedom, RMSE, unweighted R², and weighted chi-square when applicable. Bands are approximate mean-response confidence intervals from parameter covariance and a numerical Jacobian, not prediction intervals. Unidentifiable covariance suppresses uncertainties/bands; bound warnings require interpretation. Export the complete JSON report for parameters, covariance, residuals, fit recipe and source information. Existing fit overlays can be removed in the fitting dialog. Editing source columns or scale factors clears stale fits.
+
+## Recorded transformations
+
+**Analyze → Transform dataset** supports calculated columns, scaling, maximum-magnitude/range normalization, constant baseline subtraction, boolean row filters, moving averages and Savitzky–Golay smoothing. Enter explicit output names and units, preview the result, then create a derived dataset. Originals remain embedded; every operation records parameters and the parent dataset. Smoothing uses row order and assumes equally spaced samples; it never silently sorts, resamples or removes invalid observations.
+
+Expressions can refer to identifiers or `col("column name")` and use arithmetic, comparisons, `sin`, `cos`, `tan`, `exp`, `log`, `log10`, `sqrt`, `abs`, `minimum`, `maximum` and `where`. Example: `col("current") / 0.25`; filter: `col("potential") >= 0`. The language does not support arbitrary Python, attributes, imports or scripts.
+
+**Analyze → Data provenance** displays source/import metadata and recorded operations. Recompute from recorded parent creates a fresh result of the last operation using its stored parent; the previous result remains available. Derived results are never silently recalculated on file changes.
+
+## Replicates and uncertainty
+
+**Analyze → Summarize replicates** groups measurements by an explicit column and chooses Mean or Median, then None, sample SD, SEM or a confidence interval. SEM is defined for the mean. Mean confidence intervals use Student's t distribution; median intervals use a deterministic 2000-sample percentile bootstrap. SD describes measurement spread even when the displayed center is the median. Uncertainty requires at least two finite replicates per group.
+
+Choose Bar with individual points, Line with an uncertainty band, or Scatter with error bars. Lines require numeric group/X values; Scatter also supports named categories. The derived table includes center, asymmetric errors, interval boundaries and group counts. Nonfinite values are excluded explicitly from each group's count. The original observations can be displayed over summary bars. The selected panel is converted to the requested summary plot; Undo restores it.
+
+## Data zooms and secondary units
+
+**Panel tools → Zoom inset, linked axes and uncertainty** keeps these advanced settings outside the inspector. The Data zoom tab magnifies Line/Scatter data using explicit plotted-unit limits, panel-relative bounds and optional connectors. Open it after panning/zooming to initialize the region from the current view; parent export limits remain unchanged. Curves and confidence-band polygons appear in the inset. Image insets remain available separately.
+
+Linked axes use an explicit affine conversion: `secondary = primary × factor + offset`, with an invertible, nonzero factor. They follow the primary scale and limits; they do not plot a different dataset. Example: V to mV uses 1000 and 0, Celsius to kelvin uses 1 and 273.15. The uncertainty tab specifies X-error columns, asymmetric Y deviations and absolute band boundary columns for the selected series.

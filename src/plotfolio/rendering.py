@@ -11,7 +11,9 @@ from matplotlib.ticker import FormatStrFormatter, LogLocator, MaxNLocator
 from .annotations import add_annotation
 from .constants import COLORS
 from .data import columns, image_array, numeric, ratios
+from .ingestion import axis_label
 from .legends import draw_legend, shared_entries
+from .overlays import overlays
 
 
 class PanelOffsetLayoutEngine(ConstrainedLayoutEngine):
@@ -136,7 +138,9 @@ def build_figure(doc):
             if p["kind"] != "Image":
                 ax.set_xscale(p["xscale"])
                 ax.set_yscale(p["yscale"])
-            categorical = p["kind"] in ["Bar", "Box", "Violin", "Strip"]
+            categorical = p["kind"] in ["Bar", "Box", "Violin", "Strip"] or (
+                p["kind"] == "Scatter" and p.get("categorical_x", False)
+            )
             categories = []
             ss = [s for s in p["series"] if s.get("visible", True)]
             if p["kind"] == "Image":
@@ -186,6 +190,17 @@ def build_figure(doc):
                             if s["error"] and p["kind"] in ["Line", "Scatter", "Bar"]
                             else None
                         )
+                        if s.get("error_low") or s.get("error_high"):
+                            if not s.get("error_low") or not s.get("error_high"):
+                                raise ValueError(
+                                    "Asymmetric error bars need both lower and upper error columns."
+                                )
+                            if p["kind"] in ["Line", "Scatter", "Bar"]:
+                                err = np.array(
+                                    [numeric(data[s["error_low"]]), numeric(data[s["error_high"]])]
+                                ) * abs(yf)
+                                if yf < 0:
+                                    err = err[::-1]
                         if err is not None and np.any(err[np.isfinite(err)] < 0):
                             raise ValueError("Uncertainties must be nonnegative.")
                         valid = np.isfinite(y)
@@ -194,7 +209,17 @@ def build_figure(doc):
                         if p["yscale"] == "log" and p["kind"] != "Histogram":
                             valid &= y > 0
                         if err is not None:
-                            valid &= np.isfinite(err)
+                            valid &= (
+                                np.all(np.isfinite(err), axis=0)
+                                if err.ndim == 2
+                                else np.isfinite(err)
+                            )
+                        xerr = None
+                        if s.get("error_x") and p["kind"] in ["Line", "Scatter"]:
+                            xerr = numeric(data[s["error_x"]]) * abs(xf)
+                            if np.any(xerr[np.isfinite(xerr)] < 0):
+                                raise ValueError("X uncertainties must be nonnegative.")
+                            valid &= np.isfinite(xerr)
                         offset = int(p.get("palette_offset", 0))
                         color = color_for(s, j + offset, len(ss) + offset, g["colormap"])
                         label = s["label"]
@@ -211,7 +236,7 @@ def build_figure(doc):
                             pos = np.arange(len(categories)) + (j - (len(ss) - 1) / 2) * (
                                 0.75 / max(1, len(ss))
                             )
-                            if p["kind"] == "Bar":
+                            if p["kind"] in ["Bar", "Scatter"]:
                                 values = []
                                 errors = []
                                 for cat, group in zip(categories, groups):
@@ -222,29 +247,48 @@ def build_figure(doc):
                                     values.append(group[0] if len(group) else np.nan)
                                     mask = valid & np.array([v == cat for v in xraw])
                                     errors.append(
-                                        err[mask][0] if err is not None and mask.any() else np.nan
+                                        (err[:, mask][:, 0] if err.ndim == 2 else err[mask][0])
+                                        if err is not None and mask.any()
+                                        else np.nan
                                     )
-                                ax.bar(
-                                    pos,
-                                    values,
-                                    width=0.7 / max(1, len(ss)),
-                                    yerr=errors if err is not None else None,
-                                    color=[
-                                        color_for(
-                                            {"color": ""},
-                                            k + int(p.get("palette_offset", 0)),
-                                            len(categories) + int(p.get("palette_offset", 0)),
-                                            g["colormap"],
-                                        )
-                                        for k in range(len(categories))
-                                    ]
-                                    if p.get("category_colors", False) and len(ss) == 1
-                                    else color,
-                                    edgecolor="black",
-                                    linewidth=0.8,
-                                    label=label,
-                                    capsize=3,
-                                )
+                                if p["kind"] == "Scatter":
+                                    ax.errorbar(
+                                        pos,
+                                        values,
+                                        yerr=(np.asarray(errors).T if err.ndim == 2 else errors)
+                                        if err is not None
+                                        else None,
+                                        marker=marker or "o",
+                                        linestyle="none",
+                                        color=color,
+                                        label=label,
+                                        markersize=ms,
+                                        capsize=3,
+                                    )
+                                else:
+                                    ax.bar(
+                                        pos,
+                                        values,
+                                        width=0.7 / max(1, len(ss)),
+                                        yerr=(np.asarray(errors).T if err.ndim == 2 else errors)
+                                        if err is not None
+                                        else None,
+                                        color=[
+                                            color_for(
+                                                {"color": ""},
+                                                k + int(p.get("palette_offset", 0)),
+                                                len(categories) + int(p.get("palette_offset", 0)),
+                                                g["colormap"],
+                                            )
+                                            for k in range(len(categories))
+                                        ]
+                                        if p.get("category_colors", False) and len(ss) == 1
+                                        else color,
+                                        edgecolor="black",
+                                        linewidth=0.8,
+                                        label=label,
+                                        capsize=3,
+                                    )
                             elif p["kind"] == "Strip":
                                 for at, group in zip(pos, groups):
                                     jitter = (
@@ -316,7 +360,12 @@ def build_figure(doc):
                             if not valid.any():
                                 raise ValueError(f"No valid points for {label}.")
                             xx, yy = x[valid], y[valid]
-                            ee = err[valid] if err is not None else None
+                            xe = xerr[valid] if xerr is not None else None
+                            ee = (
+                                (err[:, valid] if err.ndim == 2 else err[valid])
+                                if err is not None
+                                else None
+                            )
                             if (
                                 p["kind"] == "Line"
                                 and p.get("line_order", "Sort by X") == "Sort by X"
@@ -324,11 +373,45 @@ def build_figure(doc):
                                 order = np.argsort(xx, kind="stable")
                                 xx, yy = xx[order], yy[order]
                                 if ee is not None:
-                                    ee = ee[order]
+                                    ee = ee[:, order] if ee.ndim == 2 else ee[order]
+                                if xe is not None:
+                                    xe = xe[order]
+                            if s.get("band_lower") or s.get("band_upper"):
+                                if not s.get("band_lower") or not s.get("band_upper"):
+                                    raise ValueError(
+                                        "An uncertainty band needs lower and upper boundary columns."
+                                    )
+                                raw_low = numeric(data[s["band_lower"]])
+                                raw_high = numeric(data[s["band_upper"]])
+                                if np.any(
+                                    raw_low[np.isfinite(raw_low) & np.isfinite(raw_high)]
+                                    > raw_high[np.isfinite(raw_low) & np.isfinite(raw_high)]
+                                ):
+                                    raise ValueError(
+                                        "Band lower boundaries cannot exceed upper boundaries."
+                                    )
+                                low = raw_low * yf
+                                high = raw_high * yf
+                                low, high = np.minimum(low, high), np.maximum(low, high)
+                                bx = x[valid]
+                                bl = low[valid]
+                                bh = high[valid]
+                                if p.get("line_order", "Sort by X") == "Sort by X":
+                                    order = np.argsort(bx, kind="stable")
+                                    bx, bl, bh = bx[order], bl[order], bh[order]
+                                ax.fill_between(
+                                    bx,
+                                    bl,
+                                    bh,
+                                    color=color,
+                                    alpha=float(s.get("band_alpha", 0.18)),
+                                    linewidth=0,
+                                )
                             ax.errorbar(
                                 xx,
                                 yy,
                                 yerr=ee,
+                                xerr=xe,
                                 color=color,
                                 label=label,
                                 marker=marker,
@@ -349,7 +432,12 @@ def build_figure(doc):
                             )
             if p["kind"] != "Image":
                 ax.set_xlabel(
-                    p["xlabel"] or (p["x"] if p["kind"] != "Histogram" else ss[0]["label"])
+                    p["xlabel"]
+                    or (
+                        axis_label(doc["datasets"][p["dataset"]], p["x"])
+                        if p["kind"] != "Histogram"
+                        else ss[0]["label"]
+                    )
                 )
                 ax.set_ylabel(
                     p["ylabel"]
@@ -417,6 +505,7 @@ def build_figure(doc):
                 if g["grid"]:
                     ax.grid(color="#D9D9D9", alpha=0.7, linewidth=0.55)
                     ax.set_axisbelow(True)
+                overlays(ax, p, doc)
                 handles, labels = ax.get_legend_handles_labels()
                 legend = p.get("legend", "Auto")
                 show_legend = g["legend"] if legend == "Auto" else legend == "Show"

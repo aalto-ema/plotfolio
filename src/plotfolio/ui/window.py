@@ -21,13 +21,15 @@ from ..engine import (
     panel,
     series,
 )
+from ..ingestion import axis_label
 from .editors import EditorMixin
 from .project_actions import ProjectActionsMixin
 from .theme import STYLE
 from .widgets import ColorEdit, PreviewFrame, StudioToolbar
+from .workflows import WorkflowMixin
 
 
-class Studio(EditorMixin, ProjectActionsMixin, W.QMainWindow):
+class Studio(WorkflowMixin, EditorMixin, ProjectActionsMixin, W.QMainWindow):
     def __init__(self):
         super().__init__()
         self.doc = demo_document()
@@ -71,7 +73,7 @@ class Studio(EditorMixin, ProjectActionsMixin, W.QMainWindow):
             ("New", "Ctrl+N", self.new),
             ("Open", "Ctrl+O", self.open_project),
             ("Save", "Ctrl+S", self.save),
-            ("Import CSV", "Ctrl+I", self.import_csv),
+            ("Import data", "Ctrl+I", self.import_data),
             ("Undo", "Ctrl+Z", self.undo),
             ("Redo", "Ctrl+Shift+Z", self.redo),
         ]:
@@ -101,8 +103,20 @@ class Studio(EditorMixin, ProjectActionsMixin, W.QMainWindow):
         save_as.triggered.connect(self.save_as)
         file_menu.addAction(save_as)
         file_menu.addSeparator()
-        file_menu.addAction(self.actions["Import CSV"])
+        file_menu.addAction(self.actions["Import data"])
         file_menu.addAction("Export figure…", self.export)
+        data_menu = self.menuBar().addMenu("Analyze")
+        data_menu.addAction("Fit selected series…", self.fit_selected)
+        data_menu.addAction("Transform dataset…", self.transform_dataset)
+        data_menu.addAction("Summarize replicates…", self.summarize_replicates)
+        data_menu.addSeparator()
+        data_menu.addAction("Data provenance…", self.data_history)
+        templates_menu = self.menuBar().addMenu("Templates")
+        templates_menu.addAction("Save figure template…", self.save_figure_template)
+        templates_menu.addAction("Apply figure template…", self.apply_figure_template)
+        templates_menu.addAction("Batch plotting…", self.batch_plot)
+        panel_menu = self.menuBar().addMenu("Panel tools")
+        panel_menu.addAction("Zoom inset, linked axes & uncertainty…", self.panel_tools)
         menu = self.menuBar().addMenu("Help")
         menu.addAction("Quick guide", self.guide)
         menu.addAction("Load example", self.load_demo)
@@ -149,8 +163,8 @@ class Studio(EditorMixin, ProjectActionsMixin, W.QMainWindow):
         button = W.QPushButton("Preview data")
         button.clicked.connect(self.show_data)
         lb.addWidget(button)
-        button = W.QPushButton("Import CSV…")
-        button.clicked.connect(self.import_csv)
+        button = W.QPushButton("Import data…")
+        button.clicked.connect(self.import_data)
         lb.addWidget(button)
         note = W.QLabel(
             "Data and images are embedded\nin saved projects. Source files\nare never modified."
@@ -280,6 +294,13 @@ class Studio(EditorMixin, ProjectActionsMixin, W.QMainWindow):
             return
         self.checkpoint((scope, self.panel_index, self.series_index, self.mark_index, key))
         target[key] = value
+        if scope == "p" and key in ["dataset", "x"]:
+            target["fits"] = []
+            target["replicates"] = None
+        if scope == "s" and key in ["y", "xfactor", "yfactor"] and self.current_panel():
+            self.current_panel()["fits"] = []
+            if key == "y":
+                self.current_panel()["replicates"] = None
         if scope == "g" and key in ["template", "columns"]:
             single, double, font, dpi = TEMPLATES[self.doc["settings"]["template"]]
             self.doc["settings"].update(
@@ -443,7 +464,13 @@ class Studio(EditorMixin, ProjectActionsMixin, W.QMainWindow):
         s = self.current_series()
         image = bool(p and p["kind"] == "Image")
         self.fields[("p", "line_order")].setEnabled(bool(p and p["kind"] == "Line"))
-        categorical = bool(p and p["kind"] in ["Bar", "Box", "Violin", "Strip"])
+        categorical = bool(
+            p
+            and (
+                p["kind"] in ["Bar", "Box", "Violin", "Strip"]
+                or (p["kind"] == "Scatter" and p.get("categorical_x", False))
+            )
+        )
         self.fields[("p", "category_colors")].setEnabled(
             bool(p and p["kind"] == "Bar" and len(p["series"]) == 1)
         )
@@ -849,7 +876,38 @@ class Studio(EditorMixin, ProjectActionsMixin, W.QMainWindow):
             nums = numeric_columns(ds) if ds else []
             x = ds["headers"][0] if ds else ""
             ys = [next((v for v in nums if v != x), nums[0])] if nums else []
+            if ds:
+                metadata = ds.get("column_metadata", {})
+                x = next((h for h, info in metadata.items() if info.get("role") == "X"), x)
+                assigned = [
+                    h for h, info in metadata.items() if info.get("role") == "Y" and h in nums
+                ]
+                if assigned:
+                    ys = assigned
+                else:
+                    ys = [
+                        h
+                        for h in ys
+                        if metadata.get(h, {}).get("role") not in ["Ignore", "Y error", "X error"]
+                    ]
+
             p = panel(dsid, x, ys, r, c)
+            if ds and ds.get("column_metadata"):
+                p["xlabel"] = axis_label(ds, x)
+                if len(ys) == 1:
+                    p["ylabel"] = axis_label(ds, ys[0])
+                errors = [
+                    h for h, info in ds["column_metadata"].items() if info.get("role") == "Y error"
+                ]
+                if len(errors) == 1 and len(ys) == 1:
+                    for s in p["series"]:
+                        s["error"] = errors[0]
+                xerrors = [
+                    h for h, info in ds["column_metadata"].items() if info.get("role") == "X error"
+                ]
+                if len(xerrors) == 1:
+                    for s in p["series"]:
+                        s["error_x"] = xerrors[0]
             p["name"] = f"Panel {len(self.doc['panels']) + 1}"
             self.doc["panels"].append(p)
             self.panel_index = len(self.doc["panels"]) - 1
