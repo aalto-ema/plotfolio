@@ -182,6 +182,7 @@ def build_figure(doc):
                         if p["xscale"] == "log":
                             raise ValueError("Categorical X axes cannot use a log scale.")
                     for j, s in enumerate(ss):
+                        before_series = set(ax.get_children())
                         if s["y"] not in data:
                             raise ValueError(f"Missing column {s['y']}.")
                         xf, yf = float(s["xfactor"]), float(s["yfactor"])
@@ -428,6 +429,11 @@ def build_figure(doc):
                                 capsize=3,
                                 elinewidth=0.9,
                             )
+                        original_index = [
+                            k for k, item in enumerate(p["series"]) if item.get("visible", True)
+                        ][j]
+                        for artist in set(ax.get_children()) - before_series:
+                            artist.set_gid(f"series:{original_index}")
                         omitted = len(y) - int(valid.sum())
                         if omitted:
                             notes.append(f"{p['name']} / {label}: excluded {omitted} invalid rows.")

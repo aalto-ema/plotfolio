@@ -1,6 +1,6 @@
 # PlotFolio
 
-A local Python desktop studio for publication-quality scientific figures, built with PySide6 and Matplotlib. Licensed under MIT. PlotFolio is an early-stage desktop application (0.4.0).
+A local Python desktop studio for publication-quality scientific figures, built with PySide6 and Matplotlib. Licensed under MIT. PlotFolio is an early-stage desktop application (0.5.0).
 
 ## Run
 
@@ -32,7 +32,10 @@ project filename: `python run_plotfolio.py examples/example.plotfolio.json`.
 - Recorded calculations, scaling, normalization, baseline subtraction, filtering and smoothing in immutable derived tables.
 - Explicit mean/median replicate summaries with SD, SEM or confidence intervals, raw-point overlays and uncertainty bands.
 - Data zoom insets with connectors and linked unit axes via explicit affine conversions.
-- Live figure, panel, series and annotation editing with undo/redo.
+- Click-to-edit labels, curves, legends and annotations; undo/redo and local autosave/recovery.
+- Final-size publication checks, export bundles, color-accessibility previews and panel typography overrides.
+- Physical alignment/equal-gap distribution and optional non-exported snapping guides.
+- Explicit uncertainty definitions and approximate confidence/prediction bands.
 - Line, scatter, categorical, histogram, heatmap and image panels; image insets.
 - Physical figure dimensions, grid ratios and spans, shared axes, explicit limits and ticks.
 - Per-series colors, markers, legend labels, line styles, scaling and uncertainty columns.

@@ -21,3 +21,12 @@ plotfolio_ui.png
 
 *.plotfolio-template.json
 !examples/*.plotfolio-template.json
+
+# User tables and generated publication archives
+*.zip
+*.csv
+*.tsv
+*.xlsx
+*.xls
+!examples/*.csv
+!examples/*.tsv

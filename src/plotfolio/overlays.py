@@ -80,9 +80,13 @@ def overlays(ax, panel, doc=None):
                     inset.fill(
                         vertices[:, 0],
                         vertices[:, 1],
-                        color=collection.get_facecolor()[0],
+                        facecolor=collection.get_facecolor()[0],
                         alpha=collection.get_alpha(),
-                        linewidth=0,
+                        hatch=collection.get_hatch(),
+                        edgecolor=collection.get_edgecolor()[0]
+                        if collection.get_hatch() and len(collection.get_edgecolor())
+                        else "none",
+                        linewidth=0.4 if collection.get_hatch() else 0,
                     )
         inset.set_xscale(ax.get_xscale())
         inset.set_yscale(ax.get_yscale())

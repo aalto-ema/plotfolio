@@ -30,7 +30,8 @@ def tag_targets(axes, panels):
             )
             if index is not None:
                 for artist in descendants(container):
-                    artist.set_gid(f"series:{index}")
+                    if not artist.get_gid():
+                        artist.set_gid(f"series:{index}")
         for artist in ax.lines:
             if not artist.get_gid():
                 index = next(
@@ -42,7 +43,8 @@ def tag_targets(axes, panels):
                     None,
                 )
                 if index is not None:
-                    artist.set_gid(f"series:{index}")
+                    if not artist.get_gid():
+                        artist.set_gid(f"series:{index}")
 
 
 def hit_target(axes, event):
@@ -59,6 +61,8 @@ def hit_target(axes, event):
             *ax.collections,
         ]
         for artist in artists:
+            if artist in [*ax.lines, *ax.patches, *ax.collections] and event.inaxes is not ax:
+                continue
             if artist.get_gid() and artist.get_visible() and artist.contains(event)[0]:
                 return index, artist.get_gid()
     return None

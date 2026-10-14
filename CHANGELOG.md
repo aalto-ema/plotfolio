@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.5.0 — 2026-10-14
 
 - Added panel-specific fonts, label/tick/title sizes and numeric formatting with reset to figure-wide defaults.
 

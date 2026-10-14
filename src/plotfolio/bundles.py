@@ -12,6 +12,7 @@ from pathlib import Path
 import matplotlib as mpl
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 
+from . import __version__
 from .rendering import build_figure
 
 
@@ -50,6 +51,7 @@ def export_bundle(doc, destination, formats=("pdf", "svg", "png")):
             archive.writestr("project.plotfolio.json", json.dumps(doc, indent=2, allow_nan=False))
             manifest = dict(
                 bundle_version=1,
+                plotfolio_version=__version__,
                 created_utc=datetime.now(timezone.utc).isoformat(),
                 dimensions_mm=[doc["settings"]["width"], doc["settings"]["height"]],
                 datasets=[],

@@ -1,6 +1,7 @@
 """Explicit uncertainty definitions and approximate fit prediction bands."""
 
 import numpy as np
+from matplotlib.colors import to_rgba
 from scipy.stats import norm, t
 
 DEFINITIONS = [
@@ -43,5 +44,10 @@ def prediction_band(fit, noise_sd=None):
 
 def band_appearance(definition, color, alpha):
     if definition == "Prediction interval":
-        return dict(color=color, alpha=alpha, hatch="//", edgecolor=color, linewidth=0.4)
+        return dict(
+            facecolor=to_rgba(color, alpha),
+            hatch="///",
+            edgecolor=to_rgba(color, 0.65),
+            linewidth=0.4,
+        )
     return dict(color=color, alpha=alpha, linewidth=0)
