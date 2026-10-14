@@ -1,5 +1,7 @@
 import unittest
+
 import numpy as np
+
 from plotfolio.fitting import fit_curve
 from plotfolio.uncertainty import prediction_band
 
