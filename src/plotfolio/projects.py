@@ -15,11 +15,14 @@ def save_project(doc, path):
 
 
 def load_project(path):
-    doc = json.loads(Path(path).read_text(encoding="utf-8"))
+    return normalize_document(json.loads(Path(path).read_text(encoding="utf-8")), path)
+
+
+def normalize_document(doc, path=None, validate=True):
     if doc.get("version") == 1:
         csvpath = Path(doc["csv"])
         if not csvpath.is_absolute():
-            csvpath = Path(path).parent / csvpath
+            csvpath = (Path(path).parent if path else Path.cwd()) / csvpath
         ds = read_csv(csvpath)
         fresh = document()
         fresh["datasets"]["data"] = ds
@@ -56,5 +59,6 @@ def load_project(path):
         doc["panels"][index]["series"] = [{**series(s["y"]), **s} for s in p["series"]]
     for p in doc["panels"]:
         p.update({key: value for key, value in legend_defaults().items() if key not in p})
-    build_figure(doc)
+    if validate:
+        build_figure(doc)
     return doc

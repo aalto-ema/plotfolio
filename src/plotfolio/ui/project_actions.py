@@ -91,6 +91,7 @@ class ProjectActionsMixin:
 
     def replace_document(self, doc, filename=None):
         self.timer.stop()
+        self.clear_recovery()
         self.doc = doc
         self.filename = filename
         self.dirty = False
@@ -146,6 +147,7 @@ class ProjectActionsMixin:
             save_project(self.doc, path)
             self.filename = path
             self.dirty = False
+            self.clear_recovery()
             self.update_title()
             self.statusBar().showMessage("Saved project with embedded data and images.")
             return True

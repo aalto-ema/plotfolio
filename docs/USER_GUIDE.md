@@ -218,3 +218,7 @@ Click axis labels, tick labels, panel letters, curves, bars or annotations to se
 ## Publication checks
 
 File → Publication checks renders a fresh figure at the exported millimetre dimensions and reports clipped text/legends, overlapping plotting areas, legends that may cover line data, unavailable fonts, text under 7 pt and raster images below 300 DPI. Select an affected panel from the report. Export also reports the number of findings in the status bar without blocking output. Checks are heuristic: review the PDF visually and follow your journal’s requirements.
+
+## Autosave and recovery
+
+Unsaved edits are captured every 60 seconds in local application-data recovery files, separate from your project. On restart, interrupted sessions offer Restore, Discard selected or Later. File → Recover interrupted work reopens the chooser. Restoration is unsaved until you save explicitly; normal save/discard/close removes that window’s snapshot. Active sessions are excluded from recovery. Headless tests disable autosave unless a temporary recovery directory is supplied.

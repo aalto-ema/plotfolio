@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added atomic autosave snapshots and explicit restore/discard recovery for interrupted sessions.
+
 - Added final-size publication checks for clipping, small text, unavailable fonts, image resolution and overlaps.
 
 - Added direct editing from plotted labels, curves, legends and annotations; double-click fitted curves to style them.

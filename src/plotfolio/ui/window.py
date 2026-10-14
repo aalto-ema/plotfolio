@@ -24,12 +24,13 @@ from ..engine import (
 from ..ingestion import axis_label
 from .editors import EditorMixin
 from .project_actions import ProjectActionsMixin
+from .recovery import RecoveryMixin
 from .theme import STYLE
 from .widgets import ColorEdit, PreviewFrame, StudioToolbar
 from .workflows import WorkflowMixin
 
 
-class Studio(WorkflowMixin, EditorMixin, ProjectActionsMixin, W.QMainWindow):
+class Studio(RecoveryMixin, WorkflowMixin, EditorMixin, ProjectActionsMixin, W.QMainWindow):
     def __init__(self):
         super().__init__()
         self.doc = demo_document()
@@ -63,6 +64,7 @@ class Studio(WorkflowMixin, EditorMixin, ProjectActionsMixin, W.QMainWindow):
         self.guard = False
         self.refresh()
         self.render()
+        self.setup_recovery()
 
     def create_toolbar(self):
         bar = self.addToolBar("Project")
@@ -106,6 +108,7 @@ class Studio(WorkflowMixin, EditorMixin, ProjectActionsMixin, W.QMainWindow):
         file_menu.addAction(self.actions["Import data"])
         file_menu.addAction("Export figure…", self.export)
         file_menu.addAction("Publication checks…", self.publication_checks)
+        file_menu.addAction("Recover interrupted work…", self.recover_work)
         data_menu = self.menuBar().addMenu("Analyze")
         data_menu.addAction("Fit selected series…", self.fit_selected)
         data_menu.addAction("Transform dataset…", self.transform_dataset)
@@ -1129,6 +1132,7 @@ class Studio(WorkflowMixin, EditorMixin, ProjectActionsMixin, W.QMainWindow):
 
     def closeEvent(self, event):
         if self.confirm_discard():
+            self.clear_recovery()
             event.accept()
         else:
             event.ignore()
