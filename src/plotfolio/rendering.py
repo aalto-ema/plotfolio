@@ -12,6 +12,7 @@ from .annotations import add_annotation
 from .constants import COLORS
 from .data import columns, image_array, numeric, ratios
 from .ingestion import axis_label
+from .interaction import tag_targets
 from .legends import draw_legend, shared_entries
 from .overlays import overlays
 
@@ -535,8 +536,11 @@ def build_figure(doc):
                 inset = ax.inset_axes(bounds)
                 inset.imshow(image_array(p["inset"]), alpha=float(p["image_alpha"]))
                 inset.set_axis_off()
-            for a in p["annotations"]:
+            for mark_index, a in enumerate(p["annotations"]):
+                before = set(ax.get_children())
                 add_annotation(ax, a)
+                for artist in set(ax.get_children()) - before:
+                    artist.set_gid(f"annotation:{mark_index}")
             if g["letters"] and len(panels) > 1:
                 label = chr(65 + i) if i < 26 else str(i + 1)
                 if g.get("label_case") == "lowercase":
@@ -560,6 +564,10 @@ def build_figure(doc):
             if shared_settings.get("legend_placement") == "Inside":
                 shared_settings["legend_placement"] = "Outside below"
             draw_legend(fig, handles, labels, shared_settings, font, shared=True)
+        if g["letters"] and len(panels) > 1:
+            for ax in axes:
+                ax.texts[-1].set_gid("panel:label_x")
+        tag_targets(axes, panels)
         offsets = []
         for ax, p in zip(axes, panels):
             x, y = float(p.get("offset_x", 0)), float(p.get("offset_y", 0))

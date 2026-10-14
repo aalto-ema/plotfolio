@@ -9,8 +9,11 @@ from .fit_styles import draw_fit
 
 
 def overlays(ax, panel, doc=None):
-    for fit in panel.get("fits", []):
+    for index, fit in enumerate(panel.get("fits", [])):
+        count = len(ax.lines)
         draw_fit(ax, fit)
+        if len(ax.lines) > count:
+            ax.lines[count].set_gid(f"fit:{index}")
     raw = panel.get("replicates")
     if raw and doc and panel["kind"] == "Bar":
         from .data import columns, numeric

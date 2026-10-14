@@ -652,6 +652,12 @@ class Studio(WorkflowMixin, EditorMixin, ProjectActionsMixin, W.QMainWindow):
         ]
         for legend, scope, index, transform in candidates:
             if legend.contains(event)[0]:
+                self.focus_plot_field(
+                    index if index is not None else self.panel_index,
+                    0 if scope == "g" else 1,
+                    scope,
+                    "legend_placement",
+                )
                 bounds = legend.get_window_extent(self.canvas.get_renderer())
                 self.legend_drag = dict(
                     legend=legend,
@@ -695,11 +701,51 @@ class Studio(WorkflowMixin, EditorMixin, ProjectActionsMixin, W.QMainWindow):
         self.fill_scope(drag["scope"])
         self.schedule()
 
+    def focus_plot_field(self, panel_index, tab, scope, key):
+        self.panels.setCurrentRow(panel_index)
+        self.tabs.setCurrentIndex(tab)
+        widget = self.fields[(scope, key)]
+        self.tabs.currentWidget().ensureWidgetVisible(widget)
+        widget.setFocus()
+
     def plot_clicked(self, event):
         if getattr(self, "legend_drag", None):
             return
-        if event.button != 1 or event.inaxes is None or self.toolbar.mode:
+        if event.button != 1 or self.toolbar.mode:
             return
+        if (
+            not self.place_mode
+            and not self.timer.isActive()
+            and getattr(self, "rendered_panels", []) == self.doc["panels"]
+        ):
+            from ..interaction import hit_target
+
+            hit = hit_target(self.plot_axes, event)
+            if hit:
+                index, target = hit
+                kind, key = target.split(":", 1)
+                if kind == "panel":
+                    self.focus_plot_field(index, 1, "p", key)
+                    return
+                self.panels.setCurrentRow(index)
+                if kind == "series":
+                    self.series_list.setCurrentRow(int(key))
+                    self.tabs.setCurrentIndex(2)
+                    return
+                if kind == "annotation":
+                    self.marks.setCurrentRow(int(key))
+                    self.tabs.setCurrentIndex(3)
+                    return
+                if kind == "fit" and event.dblclick:
+                    from .fit_style import FitStyleDialog
+
+                    FitStyleDialog(self, self.doc["panels"][index]["fits"][int(key)]).exec()
+                    return
+                if kind == "fit":
+                    self.statusBar().showMessage(
+                        "Double-click this fitted curve to edit its appearance."
+                    )
+                    return
         if event.inaxes not in self.plot_axes:
             return
         # Do not place on a stale preview following an invalid edit.

@@ -210,3 +210,7 @@ Linked axes use an explicit affine conversion: `secondary = primary × factor + 
 In Analyze → Fit selected series, expand **Curve appearance** to choose color, solid/dashed/dotted/dash-dot lines, width, markers and marker size, curve opacity/visibility, and confidence-band color/opacity. The preview updates without recomputing fit parameters. Markers are spaced automatically along the fitted curve. The legend label is editable in the model section.
 
 For a curve already added, choose it in the existing-fit list and click **Edit selected fit appearance**. Review the live preview and Apply to save styling without changing parameters, covariance, residuals or confidence bounds. Undo restores its previous appearance. Styling is saved with the project and used by legends, zoom insets and exports.
+
+## Direct editing
+
+Click axis labels, tick labels, panel letters, curves, bars or annotations to select their inspector controls. Click legends to open legend settings; dragging still moves them. Double-click a fitted curve to edit its appearance. Pan/zoom and annotation placement take precedence over selection.
