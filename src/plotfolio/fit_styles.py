@@ -4,6 +4,8 @@ import math
 
 from matplotlib.colors import is_color_like
 
+from .uncertainty import band_appearance
+
 
 def fit_style(fit):
     style = dict(
@@ -50,11 +52,17 @@ def draw_fit(ax, fit):
         label=fit.get("label", fit["model"] + " fit"),
     )
     if style["show_band"] and fit.get("lower") is not None:
-        ax.fill_between(
-            fit["x"],
-            fit["lower"],
-            fit["upper"],
-            color=style["band_color"] or style["color"],
-            alpha=style["band_alpha"],
-            linewidth=0,
-        )
+        prediction = fit.get("band_kind") == "Prediction interval"
+        low = fit.get("prediction_lower") if prediction else fit["lower"]
+        high = fit.get("prediction_upper") if prediction else fit["upper"]
+        if low is not None:
+            ax.fill_between(
+                fit["x"],
+                low,
+                high,
+                **band_appearance(
+                    "Prediction interval" if prediction else "Confidence interval",
+                    style["band_color"] or style["color"],
+                    style["band_alpha"],
+                ),
+            )

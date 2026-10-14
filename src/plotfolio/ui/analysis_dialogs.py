@@ -218,7 +218,7 @@ class FitDialog(W.QDialog):
             figure = Figure(figsize=(5, 4), layout="constrained")
             ax = figure.add_subplot()
             ax.scatter(r["data_x"], r["data_y"], s=12, color="#009EFA", label="Observations")
-            styled = dict(r, **self.style_editor.values(), label=self.fit_label.text())
+            styled = dict(r, **self.style_editor.resolved(r), label=self.fit_label.text())
             draw_fit(ax, styled)
             ax.set_xlabel(self.panel["xlabel"] or self.panel["x"])
             ax.set_ylabel(self.panel["ylabel"] or s["label"])
@@ -248,7 +248,7 @@ class FitDialog(W.QDialog):
         if self.result is None:
             return
         try:
-            style = self.style_editor.values()
+            style = self.style_editor.resolved(self.result)
         except ValueError as error:
             self.status.setText(str(error))
             return
@@ -286,7 +286,12 @@ class FitDialog(W.QDialog):
                 label="Observations",
             )
             draw_fit(
-                ax, dict(self.result, **self.style_editor.values(), label=self.fit_label.text())
+                ax,
+                dict(
+                    self.result,
+                    **self.style_editor.resolved(self.result),
+                    label=self.fit_label.text(),
+                ),
             )
             ax.set_xlabel(self.panel["xlabel"] or self.panel["x"])
             ax.set_ylabel(self.panel["ylabel"] or self.selected["label"])
@@ -542,7 +547,20 @@ class DatasetAnalysisDialog(W.QDialog):
             p["xlabel"] = self.group.currentText()
             p["ylabel"] = self.column.currentText()
             p["series"][0].update(
-                label=self.column.currentText(), error_low="error_low", error_high="error_high"
+                label=self.column.currentText(),
+                error_low="error_low",
+                error_high="error_high",
+                error_definition={
+                    "SD": "Sample SD",
+                    "SEM": "SEM",
+                    "Confidence interval": "Confidence interval",
+                    "None": "Unspecified",
+                }[self.uncertainty.currentText()],
+                band_definition=self.uncertainty.currentText()
+                if self.uncertainty.currentText() != "SD"
+                else "Sample SD",
+                uncertainty_confidence=self.confidence.value(),
+                uncertainty_note=json.dumps(self.result["history"][-1]),
             )
             if kind.startswith("Line"):
                 p["series"][0].update(band_lower="lower", band_upper="upper")

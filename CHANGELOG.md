@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added explicit uncertainty definitions and visually distinct, approximate fit prediction intervals.
+
 - Added physical panel alignment/equal-gap distribution and optional, non-exported snapping guides.
 
 - Added atomic autosave snapshots and explicit restore/discard recovery for interrupted sessions.

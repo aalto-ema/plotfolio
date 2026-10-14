@@ -55,6 +55,10 @@ def series(column, index=0):
         band_lower="",
         band_upper="",
         band_alpha=0.18,
+        error_definition="Unspecified",
+        band_definition="Unspecified",
+        uncertainty_confidence=95.0,
+        uncertainty_note="",
         visible=True,
         color_index=index,
     )

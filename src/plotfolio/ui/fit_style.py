@@ -8,6 +8,7 @@ from PySide6 import QtCore as C
 from PySide6 import QtWidgets as W
 
 from ..fit_styles import draw_fit, fit_style
+from ..uncertainty import prediction_band
 from .widgets import ColorEdit
 from .workflow_widgets import combo, hint, line, number
 
@@ -41,6 +42,11 @@ class FitStyleEditor(W.QWidget):
         self.show_band = W.QCheckBox("Show confidence band when available")
         self.show_band.setChecked(style["show_band"])
         form.addRow(self.show_band)
+        self.band_kind = combo(["Confidence interval", "Prediction interval"])
+        self.band_kind.setCurrentText(fit.get("band_kind", "Confidence interval"))
+        form.addRow("Interval type", self.band_kind)
+        self.prediction_sd = number(fit.get("prediction_sd", 0), 0, 1e9, 0.1)
+        form.addRow("New-observation SD (0 = estimate)", self.prediction_sd)
         self.band_color = ColorEdit()
         self.band_color.edit.setPlaceholderText("Same as curve")
         self.band_color.set_value(style["band_color"])
@@ -49,15 +55,21 @@ class FitStyleEditor(W.QWidget):
         form.addRow("Band opacity", self.band_alpha)
         for widget in [self.color, self.band_color]:
             widget.changed.connect(self.changed)
-        for widget in [self.linestyle, self.marker]:
+        for widget in [self.linestyle, self.marker, self.band_kind]:
             widget.currentTextChanged.connect(self.changed)
-        for widget in [self.width, self.marker_size, self.alpha, self.band_alpha]:
+        for widget in [
+            self.width,
+            self.marker_size,
+            self.alpha,
+            self.band_alpha,
+            self.prediction_sd,
+        ]:
             widget.valueChanged.connect(self.changed)
         for widget in [self.visible, self.show_band]:
             widget.toggled.connect(self.changed)
 
     def values(self):
-        return fit_style(
+        style = fit_style(
             dict(
                 color=self.color.value(),
                 linestyle=self.linestyle.currentText(),
@@ -71,6 +83,15 @@ class FitStyleEditor(W.QWidget):
                 band_alpha=self.band_alpha.value(),
             )
         )
+        style["band_kind"] = self.band_kind.currentText()
+        style["prediction_sd"] = self.prediction_sd.value()
+        return style
+
+    def resolved(self, fit):
+        style = self.values()
+        if style["band_kind"] == "Prediction interval":
+            style.update(prediction_band(fit, style["prediction_sd"] or None))
+        return style
 
 
 class FitStyleDialog(W.QDialog):
@@ -117,7 +138,7 @@ class FitStyleDialog(W.QDialog):
 
     def candidate(self):
         candidate = copy.deepcopy(self.fit)
-        candidate.update(self.editor.values())
+        candidate.update(self.editor.resolved(self.fit))
         candidate["label"] = self.label.text().strip() or self.fit["model"] + " fit"
         return candidate
 
@@ -151,7 +172,9 @@ class FitStyleDialog(W.QDialog):
         try:
             candidate = self.candidate()
             self.studio.checkpoint()
-            self.fit.update({key: candidate[key] for key in [*self.editor.values(), "label"]})
+            self.fit.update(
+                {key: candidate[key] for key in [*self.editor.resolved(self.fit), "label"]}
+            )
             self.studio.schedule()
             self.status.setText("Appearance applied. Undo restores the previous style.")
         except Exception as error:

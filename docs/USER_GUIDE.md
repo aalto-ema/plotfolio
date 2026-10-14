@@ -226,3 +226,9 @@ Unsaved edits are captured every 60 seconds in local application-data recovery f
 ## Alignment and snapping
 
 Panel tools → Align panels and guides selects multiple panels for left/right/top/bottom/center alignment or equal-gap distribution. Alignment uses plotting areas and the first selected reference; distribution requires three panels and preserves the outer span. Operations change physical offsets and support Undo. Optional snapping rounds annotation placement and manually entered panel-label coordinates to normalized guides. Guides appear during annotation placement only and are never exported.
+
+## Uncertainty meaning and prediction intervals
+
+Panel tools → Series uncertainty records the meaning of error/band columns, confidence level and a definition/source note. Specifying a label does not calculate statistics. Summary operations fill these definitions explicitly. Confidence bands are solid fills; prediction bands are hatched.
+
+Fit Curve appearance selects a mean-response confidence interval or an approximate interval for a new independent observation. Unweighted prediction intervals estimate Gaussian noise from residual variance; weighted fits require an explicit new-observation SD in plotted units. These use the existing parameter covariance and a delta-method approximation; bound/unidentifiable-model caveats still apply. The assumption, SD and prediction bounds are saved with the fit.

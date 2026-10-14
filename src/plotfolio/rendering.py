@@ -15,6 +15,7 @@ from .ingestion import axis_label
 from .interaction import tag_targets
 from .legends import draw_legend, shared_entries
 from .overlays import overlays
+from .uncertainty import band_appearance
 
 
 class PanelOffsetLayoutEngine(ConstrainedLayoutEngine):
@@ -404,9 +405,11 @@ def build_figure(doc):
                                     bx,
                                     bl,
                                     bh,
-                                    color=color,
-                                    alpha=float(s.get("band_alpha", 0.18)),
-                                    linewidth=0,
+                                    **band_appearance(
+                                        s.get("band_definition", "Unspecified"),
+                                        color,
+                                        float(s.get("band_alpha", 0.18)),
+                                    ),
                                 )
                             ax.errorbar(
                                 xx,

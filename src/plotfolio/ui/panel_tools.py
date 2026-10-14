@@ -5,6 +5,7 @@ import copy
 from PySide6 import QtWidgets as W
 
 from ..data import numeric_columns
+from ..uncertainty import DEFINITIONS
 from .workflow_widgets import combo, form, hint, line, number
 
 
@@ -122,6 +123,20 @@ class PanelToolsDialog(W.QDialog):
             widget.setEnabled(self.selected is not None)
             self.band_fields[key] = widget
             f.addRow(label, widget)
+        self.definition = combo(DEFINITIONS)
+        self.definition.setCurrentText((self.selected or {}).get("error_definition", "Unspecified"))
+        f.addRow("Error meaning", self.definition)
+        self.band_definition = combo(DEFINITIONS)
+        self.band_definition.setCurrentText(
+            (self.selected or {}).get("band_definition", "Unspecified")
+        )
+        f.addRow("Band meaning", self.band_definition)
+        self.confidence = number(
+            (self.selected or {}).get("uncertainty_confidence", 95), 1, 99.99, 1
+        )
+        f.addRow("Interval confidence / %", self.confidence)
+        self.uncertainty_note = line((self.selected or {}).get("uncertainty_note", ""))
+        f.addRow("Definition / source note", self.uncertainty_note)
         self.alpha = number((self.selected or {}).get("band_alpha", 0.18), 0, 1, 0.05)
         f.addRow("Band opacity", self.alpha)
         band_layout.addStretch()
@@ -157,7 +172,13 @@ class PanelToolsDialog(W.QDialog):
                 p["series"][index].update(
                     {key: widget.currentText() for key, widget in self.band_fields.items()}
                 )
-                p["series"][index]["band_alpha"] = self.alpha.value()
+                p["series"][index].update(
+                    band_alpha=self.alpha.value(),
+                    error_definition=self.definition.currentText(),
+                    band_definition=self.band_definition.currentText(),
+                    uncertainty_confidence=self.confidence.value(),
+                    uncertainty_note=self.uncertainty_note.text(),
+                )
             from matplotlib.backends.backend_agg import FigureCanvasAgg
 
             from ..rendering import build_figure
