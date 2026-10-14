@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added grayscale/color-vision previews, heuristic series-color checks and optional undoable pattern distinctions.
+
 - Added atomic export bundles containing figure formats, embedded tables, plotted curves, fit reports and provenance.
 
 - Added explicit uncertainty definitions and visually distinct, approximate fit prediction intervals.

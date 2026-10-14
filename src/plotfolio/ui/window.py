@@ -109,6 +109,7 @@ class Studio(RecoveryMixin, WorkflowMixin, EditorMixin, ProjectActionsMixin, W.Q
         file_menu.addAction("Export figure…", self.export)
         file_menu.addAction("Export publication bundle…", self.export_publication_bundle)
         file_menu.addAction("Publication checks…", self.publication_checks)
+        file_menu.addAction("Color accessibility…", self.color_accessibility)
         file_menu.addAction("Recover interrupted work…", self.recover_work)
         data_menu = self.menuBar().addMenu("Analyze")
         data_menu.addAction("Fit selected series…", self.fit_selected)
@@ -141,6 +142,11 @@ class Studio(RecoveryMixin, WorkflowMixin, EditorMixin, ProjectActionsMixin, W.Q
         from .bundles import BundleDialog
 
         BundleDialog(self).exec()
+
+    def color_accessibility(self):
+        from .accessibility import AccessibilityDialog
+
+        AccessibilityDialog(self).exec()
 
     def create_layout(self):
         split = W.QSplitter()

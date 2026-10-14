@@ -236,3 +236,7 @@ Fit Curve appearance selects a mean-response confidence interval or an approxima
 ## Export bundles
 
 File → Export publication bundle selects PDF/SVG/PNG/TIFF and writes one ZIP containing figures at the saved physical dimensions, embedded source/derived CSVs, rendered line/scatter coordinates in plotted units, individual fit reports, the portable project and a provenance manifest. Categorical/distribution/image data remain in the source tables and project. Raw identifiers use safe numbered archive paths. Export is atomic; source files are not modified. Review provenance source-path metadata before sharing.
+
+## Color accessibility
+
+File → Color accessibility previews the figure in grayscale and approximate protan/deutan/tritan simulations at full severity. Original colors and exports are unchanged. A heuristic identifies close simulated RGB series colors and suggests pattern distinctions; it is not a perceptual threshold or certification. Apply patterns to selected panel explicitly adds different line styles and optional markers, with Undo support. Inspect heatmaps and images visually as well. The color-vision matrices use the supplementary data for [Machado, Oliveira and Fernandes (2009)](https://doi.org/10.1109/TVCG.2009.113), applied in linear sRGB.
