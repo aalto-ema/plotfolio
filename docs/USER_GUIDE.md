@@ -240,3 +240,7 @@ File → Export publication bundle selects PDF/SVG/PNG/TIFF and writes one ZIP c
 ## Color accessibility
 
 File → Color accessibility previews the figure in grayscale and approximate protan/deutan/tritan simulations at full severity. Original colors and exports are unchanged. A heuristic identifies close simulated RGB series colors and suggests pattern distinctions; it is not a perceptual threshold or certification. Apply patterns to selected panel explicitly adds different line styles and optional markers, with Undo support. Inspect heatmaps and images visually as well. The color-vision matrices use the supplementary data for [Machado, Oliveira and Fernandes (2009)](https://doi.org/10.1109/TVCG.2009.113), applied in linear sRGB.
+
+## Panel typography
+
+Use Panel → Panel typography near the axis-label fields, or Panel tools → Panel typography. Override font family and individual X/Y label, tick, title and panel-letter sizes; zero inherits figure-wide defaults. Numeric axes support Auto, Plain, Scientific and Engineering formatting. Categorical text stays unchanged. Reset restores inheritance, and Undo restores previous overrides. Data, axis units and limits are not changed.

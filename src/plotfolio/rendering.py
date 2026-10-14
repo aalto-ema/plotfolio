@@ -15,6 +15,7 @@ from .ingestion import axis_label
 from .interaction import tag_targets
 from .legends import draw_legend, shared_entries
 from .overlays import overlays
+from .typography import apply_typography
 from .uncertainty import band_appearance
 
 
@@ -474,6 +475,7 @@ def build_figure(doc):
                             ticks,
                             int(p[axis + "count"]),
                             int(p[axis + "decimals"]),
+                            p.get(axis + "format", "Auto"),
                         )
                         if signatures[axis] is not None and signatures[axis] != sig:
                             raise ValueError(
@@ -520,6 +522,7 @@ def build_figure(doc):
                         legend_entries.append((handles, labels, p["name"]))
                     else:
                         draw_legend(ax, handles, labels, p, font)
+            apply_typography(ax, p, g)
             if p.get("box_aspect", "") != "":
                 ax.set_box_aspect(float(p["box_aspect"]))
             if p.get("aspect", "auto") == "equal":
@@ -557,7 +560,8 @@ def build_figure(doc):
                     float(y) if str(y).strip() else g.get("label_y", 1.04),
                     label,
                     transform=ax.transAxes,
-                    fontsize=font * 1.3,
+                    fontsize=p.get("panel_label_size") or font * 1.3,
+                    fontfamily=p.get("font_family") or g["family"],
                     va="bottom",
                     fontweight="bold",
                 )

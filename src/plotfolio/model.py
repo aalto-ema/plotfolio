@@ -1,6 +1,7 @@
 """Project schema defaults. Data remain JSON-serializable and independent of Qt."""
 
 from .legends import legend_defaults
+from .typography import defaults as typography_defaults
 
 
 def settings():
@@ -67,6 +68,7 @@ def series(column, index=0):
 def panel(dataset="", x="", ys=(), row=0, col=0):
     return dict(
         **legend_defaults(),
+        **typography_defaults(),
         name="Panel",
         dataset=dataset,
         x=x,

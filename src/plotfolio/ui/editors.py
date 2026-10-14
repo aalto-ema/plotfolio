@@ -302,6 +302,9 @@ class EditorMixin:
             box,
             r"Math labels: $H_{2}O$, $10^{-3}$, $\alpha$. Put math between dollar signs. Applies to titles, axes, legends and text annotations.",
         )
+        typography = W.QPushButton("Panel typography…")
+        typography.clicked.connect(self.panel_typography)
+        box.addWidget(typography)
         self.legend_controls(box, "p")
         form = self.group(box, "Panel label & shape")
         self.field(

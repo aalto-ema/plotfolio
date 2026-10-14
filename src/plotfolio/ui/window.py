@@ -123,6 +123,7 @@ class Studio(RecoveryMixin, WorkflowMixin, EditorMixin, ProjectActionsMixin, W.Q
         templates_menu.addAction("Batch plotting…", self.batch_plot)
         panel_menu = self.menuBar().addMenu("Panel tools")
         panel_menu.addAction("Align panels and guides…", self.align_and_snap)
+        panel_menu.addAction("Panel typography…", self.panel_typography)
         panel_menu.addAction("Zoom inset, linked axes & uncertainty…", self.panel_tools)
         menu = self.menuBar().addMenu("Help")
         menu.addAction("Quick guide", self.guide)
@@ -147,6 +148,11 @@ class Studio(RecoveryMixin, WorkflowMixin, EditorMixin, ProjectActionsMixin, W.Q
         from .accessibility import AccessibilityDialog
 
         AccessibilityDialog(self).exec()
+
+    def panel_typography(self):
+        from .typography import TypographyDialog
+
+        TypographyDialog(self).exec()
 
     def create_layout(self):
         split = W.QSplitter()

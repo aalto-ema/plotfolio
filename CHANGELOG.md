@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added panel-specific fonts, label/tick/title sizes and numeric formatting with reset to figure-wide defaults.
+
 - Added grayscale/color-vision previews, heuristic series-color checks and optional undoable pattern distinctions.
 
 - Added atomic export bundles containing figure formats, embedded tables, plotted curves, fit reports and provenance.

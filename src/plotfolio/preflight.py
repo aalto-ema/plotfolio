@@ -42,6 +42,12 @@ def check_figure(doc):
             "font",
             f"Font {doc['settings']['family']} is unavailable; an installed font is substituted.",
         )
+    for i, p in enumerate(doc["panels"]):
+        if p.get("font_family"):
+            try:
+                font_manager.findfont(p["font_family"], fallback_to_default=False)
+            except ValueError:
+                add("font", f"Panel {i + 1}: font {p['font_family']} is unavailable.", i)
     renderer = canvas.get_renderer()
     page = fig.bbox
     for i, ax in enumerate(axes):
