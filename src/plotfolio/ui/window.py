@@ -105,6 +105,7 @@ class Studio(WorkflowMixin, EditorMixin, ProjectActionsMixin, W.QMainWindow):
         file_menu.addSeparator()
         file_menu.addAction(self.actions["Import data"])
         file_menu.addAction("Export figure…", self.export)
+        file_menu.addAction("Publication checks…", self.publication_checks)
         data_menu = self.menuBar().addMenu("Analyze")
         data_menu.addAction("Fit selected series…", self.fit_selected)
         data_menu.addAction("Transform dataset…", self.transform_dataset)
@@ -120,6 +121,11 @@ class Studio(WorkflowMixin, EditorMixin, ProjectActionsMixin, W.QMainWindow):
         menu = self.menuBar().addMenu("Help")
         menu.addAction("Quick guide", self.guide)
         menu.addAction("Load example", self.load_demo)
+
+    def publication_checks(self):
+        from .preflight import PreflightDialog
+
+        PreflightDialog(self).exec()
 
     def create_layout(self):
         split = W.QSplitter()

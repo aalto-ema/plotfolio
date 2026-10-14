@@ -214,3 +214,7 @@ For a curve already added, choose it in the existing-fit list and click **Edit s
 ## Direct editing
 
 Click axis labels, tick labels, panel letters, curves, bars or annotations to select their inspector controls. Click legends to open legend settings; dragging still moves them. Double-click a fitted curve to edit its appearance. Pan/zoom and annotation placement take precedence over selection.
+
+## Publication checks
+
+File → Publication checks renders a fresh figure at the exported millimetre dimensions and reports clipped text/legends, overlapping plotting areas, legends that may cover line data, unavailable fonts, text under 7 pt and raster images below 300 DPI. Select an affected panel from the report. Export also reports the number of findings in the status bar without blocking output. Checks are heuristic: review the PDF visually and follow your journal’s requirements.

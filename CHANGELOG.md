@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added final-size publication checks for clipping, small text, unavailable fonts, image resolution and overlaps.
+
 - Added direct editing from plotted labels, curves, legends and annotations; double-click fitted curves to style them.
 
 - Added fitted-curve styling for new and existing fits, with live previews, band colors/opacity and undoable edits that preserve numerical results.

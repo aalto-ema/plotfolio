@@ -181,7 +181,18 @@ class ProjectActionsMixin:
             with mpl.rc_context({"pdf.fonttype": 42, "ps.fonttype": 42, "svg.fonttype": "none"}):
                 export_figure, _, _ = build_figure(self.doc)
                 export_figure.savefig(path, dpi=int(self.doc["settings"]["dpi"]), facecolor="white")
-            self.statusBar().showMessage("Exported " + path)
+            from ..preflight import check_figure
+
+            issues = check_figure(self.doc)
+            self.statusBar().showMessage(
+                "Exported "
+                + path
+                + (
+                    f" — {len(issues)} publication checks to review (File → Publication checks)."
+                    if issues
+                    else ""
+                )
+            )
         except Exception as e:
             self.error(e)
 
