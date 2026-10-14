@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added physical panel alignment/equal-gap distribution and optional, non-exported snapping guides.
+
 - Added atomic autosave snapshots and explicit restore/discard recovery for interrupted sessions.
 
 - Added final-size publication checks for clipping, small text, unavailable fonts, image resolution and overlaps.

@@ -76,6 +76,8 @@ class EditorMixin:
             widget.textEdited.connect(lambda value: self.change(scope, key, value))
         if tip:
             widget.setToolTip(tip)
+        if scope == "p" and key in ["label_x", "label_y"]:
+            widget.editingFinished.connect(lambda: self.fill_scope("p"))
         form.addRow(label, widget)
         self.fields[(scope, key)] = widget
         self.field_rows[(scope, key)] = (form, widget)

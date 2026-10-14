@@ -120,6 +120,7 @@ class Studio(RecoveryMixin, WorkflowMixin, EditorMixin, ProjectActionsMixin, W.Q
         templates_menu.addAction("Apply figure template…", self.apply_figure_template)
         templates_menu.addAction("Batch plotting…", self.batch_plot)
         panel_menu = self.menuBar().addMenu("Panel tools")
+        panel_menu.addAction("Align panels and guides…", self.align_and_snap)
         panel_menu.addAction("Zoom inset, linked axes & uncertainty…", self.panel_tools)
         menu = self.menuBar().addMenu("Help")
         menu.addAction("Quick guide", self.guide)
@@ -129,6 +130,11 @@ class Studio(RecoveryMixin, WorkflowMixin, EditorMixin, ProjectActionsMixin, W.Q
         from .preflight import PreflightDialog
 
         PreflightDialog(self).exec()
+
+    def align_and_snap(self):
+        from .alignment import AlignmentDialog
+
+        AlignmentDialog(self).exec()
 
     def create_layout(self):
         split = W.QSplitter()
@@ -295,6 +301,18 @@ class Studio(RecoveryMixin, WorkflowMixin, EditorMixin, ProjectActionsMixin, W.Q
         target = self.target(scope)
         if target is None:
             return
+        if (
+            scope == "p"
+            and key in ["label_x", "label_y"]
+            and self.doc["settings"].get("snap")
+            and str(value).strip()
+        ):
+            from ..alignment import snap
+
+            try:
+                value = str(snap(float(value), self.doc["settings"].get("snap_step", 0.05)))
+            except ValueError:
+                pass
         if scope == "p" and key in ["row", "col"]:
             value = int(value) - 1
         if scope == "g" and key in ["wspace", "hspace"]:
@@ -592,6 +610,31 @@ class Studio(RecoveryMixin, WorkflowMixin, EditorMixin, ProjectActionsMixin, W.Q
     def render(self):
         try:
             fig, axes, notes = build_figure(self.doc)
+            if self.place_mode and self.doc["settings"].get("snap"):
+                import numpy as np
+
+                for ax in axes[self.panel_index : self.panel_index + 1]:
+                    for position in np.arange(
+                        0, 1.001, self.doc["settings"].get("snap_step", 0.05)
+                    ):
+                        ax.plot(
+                            [position, position],
+                            [0, 1],
+                            transform=ax.transAxes,
+                            color="#008D8A",
+                            alpha=0.2,
+                            lw=0.4,
+                            zorder=1.5,
+                        )
+                        ax.plot(
+                            [0, 1],
+                            [position, position],
+                            transform=ax.transAxes,
+                            color="#008D8A",
+                            alpha=0.2,
+                            lw=0.4,
+                            zorder=1.5,
+                        )
             canvas = FigureCanvasQTAgg(fig)
             canvas.draw()
             toolbar = StudioToolbar(canvas, self.plot_container, self.export, self.apply_view)
@@ -776,6 +819,17 @@ class Studio(RecoveryMixin, WorkflowMixin, EditorMixin, ProjectActionsMixin, W.Q
             x, y = event.xdata, event.ydata
         if x is None or y is None:
             return
+        if self.doc["settings"].get("snap"):
+            from ..alignment import snap
+
+            ax = event.inaxes
+            fraction = ax.transAxes.inverted().transform((event.x, event.y))
+            fraction = [snap(v, self.doc["settings"].get("snap_step", 0.05)) for v in fraction]
+            x, y = (
+                fraction
+                if a["coords"] == "Axes fraction"
+                else ax.transData.inverted().transform(ax.transAxes.transform(fraction))
+            )
         self.checkpoint()
         if not self.place_start:
             a.update(x=float(x), y=float(y))
@@ -825,6 +879,8 @@ class Studio(RecoveryMixin, WorkflowMixin, EditorMixin, ProjectActionsMixin, W.Q
     def toggle_place(self, checked):
         self.place_mode = checked
         self.place_start = None
+        if self.doc["settings"].get("snap"):
+            self.schedule()
         if checked and self.toolbar and self.toolbar.mode:
             if "pan" in str(self.toolbar.mode).lower():
                 self.toolbar.pan()

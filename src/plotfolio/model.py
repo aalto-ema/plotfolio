@@ -21,6 +21,8 @@ def settings():
         sharex=False,
         sharey=False,
         grid=True,
+        snap=False,
+        snap_step=0.05,
         legend=True,
         letters=True,
         label_case="lowercase",

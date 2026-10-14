@@ -222,3 +222,7 @@ File → Publication checks renders a fresh figure at the exported millimetre di
 ## Autosave and recovery
 
 Unsaved edits are captured every 60 seconds in local application-data recovery files, separate from your project. On restart, interrupted sessions offer Restore, Discard selected or Later. File → Recover interrupted work reopens the chooser. Restoration is unsaved until you save explicitly; normal save/discard/close removes that window’s snapshot. Active sessions are excluded from recovery. Headless tests disable autosave unless a temporary recovery directory is supplied.
+
+## Alignment and snapping
+
+Panel tools → Align panels and guides selects multiple panels for left/right/top/bottom/center alignment or equal-gap distribution. Alignment uses plotting areas and the first selected reference; distribution requires three panels and preserves the outer span. Operations change physical offsets and support Undo. Optional snapping rounds annotation placement and manually entered panel-label coordinates to normalized guides. Guides appear during annotation placement only and are never exported.
