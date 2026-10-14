@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added atomic export bundles containing figure formats, embedded tables, plotted curves, fit reports and provenance.
+
 - Added explicit uncertainty definitions and visually distinct, approximate fit prediction intervals.
 
 - Added physical panel alignment/equal-gap distribution and optional, non-exported snapping guides.

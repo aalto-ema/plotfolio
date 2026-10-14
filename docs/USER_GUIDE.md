@@ -232,3 +232,7 @@ Panel tools → Align panels and guides selects multiple panels for left/right/t
 Panel tools → Series uncertainty records the meaning of error/band columns, confidence level and a definition/source note. Specifying a label does not calculate statistics. Summary operations fill these definitions explicitly. Confidence bands are solid fills; prediction bands are hatched.
 
 Fit Curve appearance selects a mean-response confidence interval or an approximate interval for a new independent observation. Unweighted prediction intervals estimate Gaussian noise from residual variance; weighted fits require an explicit new-observation SD in plotted units. These use the existing parameter covariance and a delta-method approximation; bound/unidentifiable-model caveats still apply. The assumption, SD and prediction bounds are saved with the fit.
+
+## Export bundles
+
+File → Export publication bundle selects PDF/SVG/PNG/TIFF and writes one ZIP containing figures at the saved physical dimensions, embedded source/derived CSVs, rendered line/scatter coordinates in plotted units, individual fit reports, the portable project and a provenance manifest. Categorical/distribution/image data remain in the source tables and project. Raw identifiers use safe numbered archive paths. Export is atomic; source files are not modified. Review provenance source-path metadata before sharing.

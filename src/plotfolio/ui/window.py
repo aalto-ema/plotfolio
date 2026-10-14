@@ -107,6 +107,7 @@ class Studio(RecoveryMixin, WorkflowMixin, EditorMixin, ProjectActionsMixin, W.Q
         file_menu.addSeparator()
         file_menu.addAction(self.actions["Import data"])
         file_menu.addAction("Export figure…", self.export)
+        file_menu.addAction("Export publication bundle…", self.export_publication_bundle)
         file_menu.addAction("Publication checks…", self.publication_checks)
         file_menu.addAction("Recover interrupted work…", self.recover_work)
         data_menu = self.menuBar().addMenu("Analyze")
@@ -135,6 +136,11 @@ class Studio(RecoveryMixin, WorkflowMixin, EditorMixin, ProjectActionsMixin, W.Q
         from .alignment import AlignmentDialog
 
         AlignmentDialog(self).exec()
+
+    def export_publication_bundle(self):
+        from .bundles import BundleDialog
+
+        BundleDialog(self).exec()
 
     def create_layout(self):
         split = W.QSplitter()
