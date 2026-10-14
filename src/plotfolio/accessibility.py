@@ -45,6 +45,8 @@ def simulate(rgb, mode):
 def color_findings(doc, mode):
     findings = []
     for i, p in enumerate(doc["panels"]):
+        if p["kind"] in ["Image", "Heatmap"]:
+            continue
         series = [s for s in p["series"] if s.get("visible", True)]
         offset = int(p.get("palette_offset", 0))
         colors = [
