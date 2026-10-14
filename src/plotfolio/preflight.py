@@ -45,8 +45,16 @@ def check_figure(doc):
     renderer = canvas.get_renderer()
     page = fig.bbox
     for i, ax in enumerate(axes):
+        excluded_ticks = set()
+        for axis, limits in [(ax.xaxis, ax.get_xlim()), (ax.yaxis, ax.get_ylim())]:
+            lo, hi = sorted(limits)
+            for tick in [*axis.get_major_ticks(), *axis.get_minor_ticks()]:
+                if not lo <= tick.get_loc() <= hi:
+                    excluded_ticks.update([tick.label1, tick.label2])
         text_items = [
-            artist for artist in ax.findobj(Text) if artist.get_visible() and artist.get_text()
+            artist
+            for artist in ax.findobj(Text)
+            if artist.get_visible() and artist.get_text() and artist not in excluded_ticks
         ]
         for text in text_items:
             bbox = text.get_window_extent(renderer)

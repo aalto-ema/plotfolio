@@ -17,3 +17,6 @@ class PublicationCheckTests(unittest.TestCase):
         doc["panels"][1]["col"] = 0
         issues = check_figure(doc)
         self.assertEqual(issues[0]["severity"], "Error")
+
+    def test_locator_ticks_outside_limits_are_not_clipping_findings(self):
+        self.assertNotIn("clipped", [item["code"] for item in check_figure(demo_document())])
