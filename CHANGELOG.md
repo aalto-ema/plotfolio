@@ -1,5 +1,9 @@
 # Changelog
 
+## Windows packaging for 0.5.0
+
+- Added a self-contained Windows x64 installer and GitHub Actions build and installation checks.
+
 ## 0.5.0 — 2026-10-14
 
 - Added panel-specific fonts, label/tick/title sizes and numeric formatting with reset to figure-wide defaults.

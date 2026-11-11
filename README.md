@@ -2,7 +2,11 @@
 
 A local Python desktop studio for publication-quality scientific figures, built with PySide6 and Matplotlib. Licensed under MIT. PlotFolio is an early-stage desktop application (0.5.0).
 
-## Run
+## Install on Windows
+
+Download `PlotFolio-<version>-Windows-x64-Setup.exe` from [GitHub Releases](https://github.com/aalto-ema/plotfolio/releases). Run Setup, then open PlotFolio from the Start menu. The per-user installer includes Python and the application dependencies; it does not require administrator access. It targets 64-bit Windows 10/11. The installer is unsigned, so Windows may show an unknown-publisher warning. The matching `.sha256` file is available to verify the download.
+
+## Run from source
 
 Python 3.10 or newer is required.
 
@@ -52,4 +56,4 @@ See [the user guide](docs/USER_GUIDE.md), [architecture](docs/ARCHITECTURE.md) a
 
 ## Development and reporting issues
 
-Clone [aalto-ema/plotfolio](https://github.com/aalto-ema/plotfolio) and install development dependencies with `python -m pip install -e '.[dev]'`. Report reproducible problems through GitHub Issues using synthetic data. This repository contains source code; standalone installers are not yet provided. The automated checks run on Linux; local UI checks have also run on macOS. Windows UI behavior has not yet been validated.
+Clone [aalto-ema/plotfolio](https://github.com/aalto-ema/plotfolio) and install development dependencies with `python -m pip install -e '.[dev]'`. Report reproducible problems through GitHub Issues using synthetic data. The automated checks run on Linux, and the Windows installer workflow tests setup, application startup, PDF export and uninstall on Windows. Local UI checks have also run on macOS.
