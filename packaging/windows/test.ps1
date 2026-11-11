@@ -27,4 +27,4 @@ $uninstall = Start-Process (Join-Path $target unins000.exe) -ArgumentList @(
     '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART'
 ) -Wait -PassThru
 if ($uninstall.ExitCode -ne 0 -or (Test-Path $exe)) { throw 'Uninstall failed' }
-Write-Output 'PASS: setup, native Qt startup, resources, PDF export and uninstall'
+Write-Output 'PASS: setup, native Qt startup, resources, PDF/SVG/PNG/TIFF exports, manuscript preview and uninstall'

@@ -13,6 +13,7 @@ def smoke_test(result):
         from PySide6.QtPdf import QPdfDocument
         from PySide6.QtWidgets import QApplication
 
+        from plotfolio.manuscript import manuscript_pdf
         from plotfolio.rendering import build_figure
         from plotfolio.ui.window import Studio
 
@@ -25,8 +26,13 @@ def smoke_test(result):
         assert files("plotfolio.ui").joinpath("icons/chevron.svg").is_file()
         figure, _, _ = build_figure(studio.doc)
         with tempfile.TemporaryDirectory() as tmp:
-            pdf = Path(tmp) / "test.pdf"
-            figure.savefig(pdf)
+            folder = Path(tmp)
+            for extension in ("pdf", "svg", "png", "tiff"):
+                export = folder / f"figure.{extension}"
+                figure.savefig(export, dpi=100)
+                assert export.stat().st_size > 0
+            pdf = folder / "manuscript.pdf"
+            manuscript_pdf(studio.doc, pdf)
             document = QPdfDocument()
             try:
                 assert document.load(str(pdf)) == QPdfDocument.Error.None_

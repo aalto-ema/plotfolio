@@ -9,6 +9,8 @@ try {
     }
     python -m PyInstaller --noconfirm --clean --onedir --windowed --noupx --name PlotFolio `
         --collect-data plotfolio --hidden-import matplotlib.backends.backend_qtagg `
+        --hidden-import matplotlib.backends.backend_pdf `
+        --hidden-import matplotlib.backends.backend_svg `
         packaging/windows/launcher.py
     python packaging/windows/notices.py dist/PlotFolio/licenses
 
