@@ -73,6 +73,7 @@ class ManuscriptDialog(W.QDialog):
         self.status.setWordWrap(True)
         layout.addWidget(self.status)
         self.pdf = QPdfDocument(self)
+        self.pdf_buffer = C.QBuffer(self)
         self.view = QPdfView(self)
         self.view.setDocument(self.pdf)
         layout.addWidget(self.view, 1)
@@ -86,6 +87,7 @@ class ManuscriptDialog(W.QDialog):
 
     def refresh(self, *_):
         self.pdf.close()
+        self.pdf_buffer.close()
         try:
             manuscript_pdf(
                 self.doc,
@@ -97,7 +99,12 @@ class ManuscriptDialog(W.QDialog):
                 self.x.value(),
                 self.top.value(),
             )
-            self.pdf.load(str(self.path))
+            # Qt PDF can retain a file handle after close() on Windows.
+            self.pdf_buffer.setData(self.path.read_bytes())
+            self.pdf_buffer.open(C.QIODevice.OpenModeFlag.ReadOnly)
+            self.pdf.load(self.pdf_buffer)
+            if self.pdf.status() != QPdfDocument.Status.Ready:
+                raise ValueError(f"Could not load the manuscript preview: {self.pdf.error().name}")
             self.view.pageNavigator().jump(self.page.value() - 1, C.QPointF())
             self.status.setText(
                 f"{self.source or 'Sample manuscript'} · Vector figure at original size. Screen 100% uses display DPI and may differ from a physical ruler."

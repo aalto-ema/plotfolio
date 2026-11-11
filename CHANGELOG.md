@@ -3,6 +3,7 @@
 ## Windows packaging for 0.5.0
 
 - Added a self-contained Windows x64 installer and GitHub Actions build and installation checks.
+- Fixed PDF manuscript preview refresh on Windows by avoiding locked temporary files.
 
 ## 0.5.0 — 2026-10-14
 

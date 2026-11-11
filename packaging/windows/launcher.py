@@ -10,11 +10,10 @@ from pathlib import Path
 def smoke_test(result):
     """Check the native Qt plugin, packaged resources, and PDF stack."""
     try:
-        from PySide6.QtPdf import QPdfDocument
         from PySide6.QtWidgets import QApplication
 
-        from plotfolio.manuscript import manuscript_pdf
         from plotfolio.rendering import build_figure
+        from plotfolio.ui.manuscript import ManuscriptDialog
         from plotfolio.ui.window import Studio
 
         app = QApplication([])
@@ -31,14 +30,13 @@ def smoke_test(result):
                 export = folder / f"figure.{extension}"
                 figure.savefig(export, dpi=100)
                 assert export.stat().st_size > 0
-            pdf = folder / "manuscript.pdf"
-            manuscript_pdf(studio.doc, pdf)
-            document = QPdfDocument()
-            try:
-                assert document.load(str(pdf)) == QPdfDocument.Error.None_
-                assert document.pageCount() == 1
-            finally:
-                document.close()
+        preview = ManuscriptDialog(studio.doc, studio)
+        assert preview.pdf.pageCount() == 1, preview.status.text()
+        preview.top.setValue(75)
+        preview.refresh()
+        assert preview.pdf.pageCount() == 1, preview.status.text()
+        preview.temp.cleanup()  # Qt must not hold the preview file open.
+        preview.close()
         studio.close()
     except Exception:
         result.write_text(traceback.format_exc(), encoding="utf-8")
